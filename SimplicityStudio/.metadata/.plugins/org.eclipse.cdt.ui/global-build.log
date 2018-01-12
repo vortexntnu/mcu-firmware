@@ -1,0 +1,3 @@
+16:00:03 **** Incremental Build of configuration GNU ARM v4.9.3 - Debug for project STK3700_blink ****
+make -j4 all 
+make: Nothing to be done for `all'.

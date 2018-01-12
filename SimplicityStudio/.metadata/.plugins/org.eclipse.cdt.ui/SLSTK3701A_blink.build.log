@@ -1,0 +1,235 @@
+13:03:26 **** Incremental Build of configuration Keil 8051 v9.53 - Release for project SLSTK3701A_blink ****
+make all 
+PATH=/usr/local/SimplicityStudio_v4/developer/toolchains/keil_8051/9.53/BIN:/usr/local/SimplicityStudio_v4/support/8051:/usr/local/SimplicityStudio_v4/support/common/wine/usr/bin:/usr/local/SimplicityStudio_v4/support/common/build:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+ 
+Building file: ../src/blink.c
+Invoking: Keil 8051 Compiler
+wine "/usr/local/SimplicityStudio_v4/developer/toolchains/keil_8051/9.53/BIN/C51" "@src/blink.__i" || test $? -lt 2
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+err:module:load_builtin_dll failed to load .so lib for builtin L"winex11.drv": libX11.so.6: cannot open shared object file: No such file or directory
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+fixme:heap:RtlSetHeapInformation (nil) 1 (nil) 0 stub
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+Wine cannot find the FreeType font library.  To enable Wine to
+use TrueType fonts please install a version of FreeType greater than
+or equal to 2.0.5.
+http://www.freetype.org
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+
+C51 COMPILER V9.53.0.0 - SN: Eval Version
+COPYRIGHT Copyright (C) 2012 - 2014 ARM Ltd and ARM Germany GmbH. All rights reserved.
+*** WARNING C318 IN LINE 16 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'stdint.h'
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+*** WARNING C318 IN LINE 17 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'stdbool.h'
+make: *** [src/blink.OBJ] Error 1
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+*** WARNING C318 IN LINE 18 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'em_device.h'
+*** WARNING C318 IN LINE 19 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'em_chip.h'
+*** WARNING C318 IN LINE 20 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'em_cmu.h'
+*** WARNING C318 IN LINE 21 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'em_emu.h'
+*** WARNING C318 IN LINE 22 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'bsp.h'
+*** WARNING C318 IN LINE 23 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: can't open file 'bsp_trace.h'
+*** ERROR C129 IN LINE 25 OF /home/bigbay/SimplicityStudio/SLSTK3701A_blink/src/blink.c: missing ';' before 'msTicks'
+
+C51 COMPILATION COMPLETE.  8 WARNING(S),  1 ERROR(S)
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+err:wincodecs:PngEncoder_CreateInstance Failed writing PNG because unable to find libpng12.so.0
+fixme:ole:CoCreateInstanceEx no instance created for interface {00000103-a8f2-4877-ba0a-fd2b6645fb94} of class {27949969-876a-41d7-9447-568f6a35a4dc}, hres is 0x80004005
+err:menubuilder:convert_to_native_icon error 0x80004005 creating bitmap encoder
+
+13:03:31 Build Finished (took 4s.735ms)
+

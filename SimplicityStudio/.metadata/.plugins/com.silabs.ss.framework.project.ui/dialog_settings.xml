@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="com.silabs.ss.framework.ide.project.core.cdtMbsProjectType">
+		<item value="com.silabs.ss.framework.ide.project.ui.emptyCProjectWizard" key="projectTypeId"/>
+		<item value="LINK_LIBRARIES" key="settingImportModeOption"/>
+		<item value="false" key="filterTemplatesByPartSdk"/>
+		<item value="projectTemplate.com.silabs.sdk.stack.super:1.1.1._523958235.usr.local.SimplicityStudio_v4.developer.sdks.gecko_sdk_suite.v1.1.app.mcu_example.SLSTK3701A_EFM32GG11.emode.SimplicityStudio.SLSTK3701A_emode.slsproj" key="selectedTemplateId"/>
+		<item value="true" key="filterTemplatesByToolchain"/>
+	</section>
+</section>

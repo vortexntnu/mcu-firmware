@@ -1,0 +1,23 @@
+#ifndef SRC_EFM32_H_
+#define SRC_EFM32_H_
+
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+
+#define CMU_HFPERCLKDIV	((volatile uint32_t*)(CMU_BASE + 0x008))
+
+#define CMU_HFPERCLKEN 0x100
+#define CMU_HFPERCLKDIV512 0x09
+
+#define TIMER0_CTRL 	((volatile uint32_t*)(TIMER0_BASE + 0x00))
+#define TIMER0_CMD  	((volatile uint32_t*)(TIMER0_BASE + 0x04))
+#define TIMER0_STATUS  	((volatile uint32_t*)(TIMER0_BASE + 0x08))
+#define TIMER0_IEN  	((volatile uint32_t*)(TIMER0_BASE + 0x0C))
+#define TIMER0_CNT  	((volatile uint32_t*)(TIMER0_BASE + 0x24))
+
+#define TIMERn_PRESCHFPERCLK 0x8000
+#define TIMERn_PRESC_DIV1024 0xA0000000
+
+#define TIMERn_CMD_START 0x01
+#define TIMERn_CMD_STOP  0x02
+
+#endif /* SRC_EFM32_H_ */
