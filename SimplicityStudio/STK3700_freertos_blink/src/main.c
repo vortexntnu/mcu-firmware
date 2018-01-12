@@ -35,6 +35,9 @@
 
 #define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
 #define TOP_VAL_PWM 1000        // sets PWM frequency to 1kHz (1MHz timer clock)
+#define UPDATE_PERIOD 250       // update compare value, toggle LED1 every 1/4 second (250ms)
+#define INC_VAL (TOP_VAL_PWM/4) // adjust compare value amount
+
 #define STACK_SIZE_FOR_TASK    (configMINIMAL_STACK_SIZE + 10)
 #define LED_TASK_PRIORITY      (tskIDLE_PRIORITY + 1)
 
@@ -70,6 +73,7 @@
   };
 
 uint16_t ms_counter = 0;
+uint32_t compare_val = 0;
 
 
 /* Structure with parameters for LedBlink */
@@ -88,20 +92,29 @@ static void LedBlink(void *pParameters)
 {
   TaskParams_t     * pData = (TaskParams_t*) pParameters;
   const portTickType delay = pData->delay;
+  uint8_t inc = 1;
 
   for (;; ) {
-	  	  if(CHECK_BIT(TIMER0->STATUS,0)){
-	      BSP_LedToggle(pData->ledNo);
-	      vTaskDelay(delay);
-	  	  }
-  	  }
+	  if(ms_counter == UPDATE_PERIOD) {
+	        if(inc) {                                    // If increment = true
+	          compare_val += INC_VAL;                    // Increase the compare value
+	        }else{                                       // increment = false
+	          compare_val -= INC_VAL;                    // Decrease the compare value
+	        }
+	        TIMER_CompareBufSet(TIMER3, 2, compare_val); // Write new value to compare buffer
+	        BSP_LedToggle(pData->ledNo);
+	        ms_counter = 0;                              // Reset counter
+	      }
+	      if(compare_val > (TOP_VAL_PWM-1)) { inc = 0; } // If compare value is at max, start decrementing
+	      if(compare_val < 1) { inc = 1; }               // If compare value is at min, start incrementing
+	    }
+	}
 
-  }
 
 void TIMER0_IRQHandler(void)
 {
-  TIMER0->IFC = 1;                              // Clear overflow flag
-  ms_counter++;									// Increment counter
+	TIMER_IntClear(TIMER0, TIMER_IF_OF); // Clear interrupt source
+	ms_counter++;                        // Increment counter
 }
 
 
@@ -110,8 +123,6 @@ void TIMER0_IRQHandler(void)
  ******************************************************************************/
 int main(void)
 {
-
-	uint32_t compare_val = 0;
 
 	/* Chip errata */
 	CHIP_Init();
@@ -129,12 +140,12 @@ int main(void)
 
 	TIMER_TopSet(TIMER0, TOP_VAL_PWM);
 	TIMER_Init(TIMER0, &timerPWMInit);
-
-	TIMER_InitCC(TIMER3, 2, &timerCCInit);       // apply channel configuration to Timer3 channel 2
-	TIMER3->ROUTE = (1 << 16) |(1 << 2);
+	TIMER_InitCC(TIMER0, 2, &timerCCInit);       // apply channel configuration to Timer3 channel 2
+	TIMER0->ROUTE = (1 << 16) |(1 << 2);
 	TIMER_CounterSet(TIMER0, 0);
 	TIMER_CompareSet(TIMER0, 2, compare_val);    // Set CC2 compare value (0% duty)
 	TIMER_CompareBufSet(TIMER0, 2, compare_val); // Set CC2 compare buffer value (0% duty)
+	TIMER_IntEnable(TIMER0, TIMER_IF_OF);        // Enable Timer0 overflow interrupt
 	NVIC_EnableIRQ(TIMER0_IRQn);
 
 
@@ -153,7 +164,6 @@ int main(void)
 	/*Create two task for blinking leds*/
 	xTaskCreate(LedBlink, (const char *) "LedBlink1", STACK_SIZE_FOR_TASK, &parametersToTask1, LED_TASK_PRIORITY, NULL);
 	xTaskCreate(LedBlink, (const char *) "LedBlink2", STACK_SIZE_FOR_TASK, &parametersToTask2, LED_TASK_PRIORITY, NULL);
-	//xTaskCreate(TimerInit, (const char *) "TimerInit", STACK_SIZE_FOR_TASK, NULL, LED_TASK_PRIORITY, NULL);
 
 
 	/*Start FreeRTOS Scheduler*/
