@@ -1,10 +1,14 @@
-## Folders
-.metadata
-outgoing
+## Folders ##
+.metadata/
+outgoing/
 
-SimplicityStudio/GNU*
-SimplicityStudio/outgoing
-SimplicityStudio/.metadata
-SimplicityStudio/.externalFiles
+SimplicityStudio/motor-controller/GNU*/
+SimplicityStudio/motor-controller/outgoing/
+SimplicityStudio/motor-controller/.settings/
 
-## Files
+SimplicityStudio/.metadata/
+SimplicityStudio/.externalFiles/
+
+## Files ##
+SimplicityStudio/motor-controller/.cproject
+SimplicityStudio/motor-controller/.project

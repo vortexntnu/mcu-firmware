@@ -1,2 +1,0 @@
-void initPwm(void);
-void TIMER0_IRQHandler(void);
