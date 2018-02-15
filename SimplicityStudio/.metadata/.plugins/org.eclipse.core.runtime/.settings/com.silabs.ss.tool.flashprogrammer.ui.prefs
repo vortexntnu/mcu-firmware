@@ -1,2 +1,3 @@
-SAVED_FILES=/home/bigbay/SimplicityStudio/STK3700_freertos_blink/GNU ARM v4.9.3 - Release/STK3700_freertos_blink.hex
+SAVED_DEVICE_ID=000440097588
+SAVED_FILES=/home/bigbay/git/motor-control-interface/SimplicityStudio/motor-controller/GNU ARM v4.9.3 - Release/motor-controller.hex
 eclipse.preferences.version=1

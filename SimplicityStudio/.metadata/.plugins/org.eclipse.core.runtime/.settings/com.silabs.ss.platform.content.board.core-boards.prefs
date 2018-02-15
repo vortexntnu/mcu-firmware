@@ -1,5 +1,5 @@
-defaultSelection=brd2200a\:0.0.0.A03\u0000
+defaultSelection=com.silabs.board.none\:0.0.0\u0000
 disabledIDs=\u0000
 eclipse.preferences.version=1
-enabledIDs=brd2200a\:0.0.0.A03\u0000com.silabs.board.none\:0.0.0\u0000
+enabledIDs=brd2200a\:0.0.0.A03\u0000
 knownParentDescs_com.silabs.ss.platform.content.core-metadataConfigs=/usr/local/SimplicityStudio_v4/configuration/studio/metadata\u0000Built In

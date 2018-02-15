@@ -1,0 +1,10 @@
+## Folders
+.metadata
+outgoing
+
+SimplicityStudio/GNU*
+SimplicityStudio/outgoing
+SimplicityStudio/.metadata
+SimplicityStudio/.externalFiles
+
+## Files

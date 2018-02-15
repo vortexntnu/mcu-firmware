@@ -7,22 +7,4 @@
 		<item value="org.eclipse.platform:4.5.1.v20150904-0015"/>
 		<item value="org.eclipse.rcp:4.5.1.v20150904-0015"/>
 	</list>
-	<section name="ExternalProjectImportWizard">
-		<item value="false" key="WizardProjectsImportPage.STORE_NESTED_PROJECTS"/>
-		<item value="false" key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID"/>
-		<item value="false" key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED"/>
-		<list key="WizardProjectsImportPage.STORE_DIRECTORIES">
-			<item value="/home/bigbay/SimplicityStudio/CORTEX_EFM32_Giant_Gecko_Simplicity_Studio"/>
-		</list>
-		<list key="WizardProjectsImportPage.STORE_ARCHIVES">
-			<item value=""/>
-		</list>
-	</section>
-	<section name="NewWizardAction">
-		<item value="com.silabs.ss.framework.ide.project.ui.NewMCUProjectWizard" key="NewWizardSelectionPage.STORE_SELECTED_ID"/>
-		<list key="NewWizardSelectionPage.STORE_EXPANDED_CATEGORIES_ID">
-			<item value="org.eclipse.ui.Basic"/>
-			<item value="org.eclipse.cdt.ui.newCWizards"/>
-		</list>
-	</section>
 </section>

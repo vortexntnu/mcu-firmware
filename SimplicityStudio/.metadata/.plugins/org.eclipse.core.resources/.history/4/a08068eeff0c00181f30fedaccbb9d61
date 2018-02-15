@@ -1,0 +1,11 @@
+#ifndef _INCL_PWM
+#define _INCL_PWM
+#endif
+
+#include "em_device.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
+#include "em_timer.h"
+
+void initPwm(void);
+void TIMER0_IRQHandler(void);

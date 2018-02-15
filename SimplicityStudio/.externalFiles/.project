@@ -10,49 +10,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_CMSIS_Include_core_cm3.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/CMSIS/Include/core_cm3.h</location>
-		</link>
-		<link>
 			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_Device_SiliconLabs_EFM3_GG_Include_efm3_gg99_f1__4.h</name>
 			<type>1</type>
 			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/Device/SiliconLabs/EFM32GG/Include/efm32gg990f1024.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_Device_SiliconLabs_EFM3_GG_Include_efm3_gg_timer.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/Device/SiliconLabs/EFM32GG/Include/efm32gg_timer.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_Device_SiliconLabs_EFM3_GG_Include_em_device.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/Device/SiliconLabs/EFM32GG/Include/em_device.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_Device_SiliconLabs_EFM3_GG_Include_system_efm3_gg.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/Device/SiliconLabs/EFM32GG/Include/system_efm32gg.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_emlib_inc_em_bus.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/emlib/inc/em_bus.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_emlib_inc_em_chip.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/emlib/inc/em_chip.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_emlib_inc_em_gpio.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/emlib/inc/em_gpio.h</location>
-		</link>
-		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_emlib_inc_em_system.h</name>
-			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/emlib/inc/em_system.h</location>
 		</link>
 		<link>
 			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_emlib_inc_em_timer.h</name>
@@ -60,14 +20,14 @@
 			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/emlib/inc/em_timer.h</location>
 		</link>
 		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_util_third_party_freertos_Source_include_FreeRTOS.h</name>
+			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_platform_emlib_inc_em_usart.h</name>
 			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/util/third_party/freertos/Source/include/FreeRTOS.h</location>
+			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/platform/emlib/inc/em_usart.h</location>
 		</link>
 		<link>
-			<name>_usr_local_SimplicityStudio_v4_developer_sdks_gecko_sdk_suite_v1.1_util_third_party_freertos_Source_include_mpu_prototypes.h</name>
+			<name>_usr_local_SimplicityStudio_v4_developer_toolchains_gnu_arm_4.9___15q3_arm-none-eabi_include_sys_unistd.h</name>
 			<type>1</type>
-			<location>/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1/util/third_party/freertos/Source/include/mpu_prototypes.h</location>
+			<location>/usr/local/SimplicityStudio_v4/developer/toolchains/gnu_arm/4.9_2015q3/arm-none-eabi/include/sys/unistd.h</location>
 		</link>
 	</linkedResources>
 </projectDescription>

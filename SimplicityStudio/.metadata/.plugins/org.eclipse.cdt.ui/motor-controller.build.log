@@ -1,0 +1,29 @@
+21:05:44 **** Incremental Build of configuration GNU ARM v4.9.3 - Release for project motor-controller ****
+make -j4 all 
+Building file: ../src/pwm.c
+Invoking: GNU ARM C Compiler
+arm-none-eabi-gcc -g -gdwarf-2 -mcpu=cortex-m3 -mthumb -std=c99 '-DEFM32GG990F1024=1' '-DNDEBUG=1' -I"/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1//platform/CMSIS/Include" -I"/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1//hardware/kit/common/bsp" -I"/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1//platform/emlib/inc" -I"/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1//hardware/kit/common/drivers" -I"/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1//platform/Device/SiliconLabs/EFM32GG/Include" -I"/usr/local/SimplicityStudio_v4/developer/sdks/gecko_sdk_suite/v1.1//hardware/kit/EFM32GG_STK3700/config" -O3 -Wall -c -fmessage-length=0 -ffunction-sections -fdata-sections -MMD -MP -MF"src/pwm.d" -MT"src/pwm.o" -o "src/pwm.o" "../src/pwm.c"
+Finished building: ../src/pwm.c
+ 
+Building target: motor-controller.axf
+Invoking: GNU ARM C Linker
+arm-none-eabi-gcc -g -gdwarf-2 -mcpu=cortex-m3 -mthumb -T "motor-controller.ld" -Xlinker --gc-sections -Xlinker -Map="motor-controller.map" --specs=nano.specs -o motor-controller.axf "./CMSIS/EFM32GG/startup_efm32gg.o" "./CMSIS/EFM32GG/system_efm32gg.o" "./emlib/em_cmu.o" "./emlib/em_gpio.o" "./emlib/em_system.o" "./emlib/em_timer.o" "./emlib/em_usart.o" "./src/main.o" "./src/pwm.o" "./src/uart.o" -Wl,--start-group -lgcc -lc -lnosys -Wl,--end-group
+Finished building target: motor-controller.axf
+ 
+Building hex file: motor-controller.hex
+arm-none-eabi-objcopy -O ihex "motor-controller.axf" "motor-controller.hex"
+ 
+Building bin file: motor-controller.bin
+arm-none-eabi-objcopy -O binary "motor-controller.axf" "motor-controller.bin"
+ 
+Building s37 file: motor-controller.s37
+arm-none-eabi-objcopy -O srec "motor-controller.axf" "motor-controller.s37"
+ 
+Running size tool
+arm-none-eabi-size "motor-controller.axf"
+   text	   data	    bss	    dec	    hex	filename
+   2200	    120	     32	   2352	    930	motor-controller.axf
+ 
+
+21:05:45 Build Finished (took 754ms)
+
