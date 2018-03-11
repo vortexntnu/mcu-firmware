@@ -8,17 +8,17 @@
 #include "em_usart.h"
 #include "efm32gg990f1024.h"
 
-#define BUFFERSIZE 4
+#define BUFFERSIZE 10
 
 extern volatile struct circularBuffer receiveBuff, transmitBuff;
 
 #define COM_PORT gpioPortD
-#define UART USART1
-#define UART_TX_pin 0
-#define UART_RX_pin 1
+#define USART_LOCATION 1
+#define USART_TX_pin 0
+#define USART_RX_pin 1
 
 void initUart(void);
-void uartGetData(uint16_t* dataPtr);
-void uartPutData(uint16_t* dataPtr);
+void uartGetData(uint8_t* dataPtr);
+void uartPutData(uint8_t* dataPtr);
 
 #endif //UART_H_
