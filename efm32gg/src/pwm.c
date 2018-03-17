@@ -1,106 +1,161 @@
 #include "pwm.h"
 
-uint32_t counter = 0;        	// global variable to count general purpose timer overflow events
-uint32_t compare_val = 0;       // Initial PWM duty cycle is 0% (LED0 off)
-uint8_t inc = 1;                // Increment = true
+uint32_t compareValue_1 = 0;
+int k_1 = 1;
+
+// TIMER ISR executes at 500 Hz
+void TIMER0_IRQHandler(void)
+{
 
 
-// TIMER ISR executes every us
-void TIMER0_IRQHandler(void) {
-  TIMER_IntClear(TIMER0, TIMER_IF_OF); 		// Clear interrupt source
-  if(counter++ > TOP_VAL_PWM) counter = 0;  // Increment counter
-}
+	if(++compareValue_1 >= 300)
+	{
+		compareValue_1 = 0;
 
-char getCounter(){
-	return counter + '0';
-}
-
-void generate_PWM(void){
-	if(getCounter() == UPDATE_PERIOD) {
-
-		if(inc) compare_val += INC_VAL;				// Increase the compare value
-		else compare_val -= INC_VAL;                // Decrease the compare value
-
-		TIMER_CompareBufSet(TIMER3, 2, compare_val); // Write new value to compare buffer
-		GPIO_PinOutToggle(gpioPortE, 3);             // Toggle LED1
-		counter = 0;	                             // Reset counter
+		if(k_1==1)
+		{
+			TIMER_CompareBufSet(TIMER0, 0, us_to_comparevalue(1500));
+			k_1 = 0;
+		}
+		else
+		{
+			TIMER_CompareBufSet(TIMER0, 0, us_to_comparevalue(1400));
+			k_1 = 1;
+		}
 	}
-	if(compare_val > (TOP_VAL_PWM-1)) { inc = 0; } // If compare value is at max, start decrementing
-	if(compare_val < 1) { inc = 1; }               // If compare value is at min, start incrementing
+
+
 }
 
-void init_Pwm(void) {
+void TIMER1_IRQHandler(void)
+{
 
-	CMU_HFRCOBandSet(cmuHFRCOBand_1MHz);    // Set HF oscillator to 1MHz and use as system source
-	CMU_ClockEnable(cmuClock_GPIO, true);   // Start GPIO peripheral clock
-	CMU_ClockEnable(cmuClock_TIMER0, true); // Start TIMER0 peripheral clock
-	CMU_ClockEnable(cmuClock_TIMER3, true); // Start TIMER3 peripheral clock
+}
 
-	GPIO_PinModeSet(gpioPortE, 2, gpioModePushPull, 0); // set LED0 pin as push-pull output
-	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 1); // set LED0 pin as push-pull output
+void TIMER2_IRQHandler(void)
+{
 
-  // Setup Timer Channel Configuration for PWM
-  TIMER_InitCC_TypeDef timerCCInit = {
-    .eventCtrl  = timerEventEveryEdge,    // This value will be ignored since we aren't using input capture
-    .edge       = timerEdgeNone,          // This value will be ignored since we aren't using input capture
-    .prsSel     = timerPRSSELCh0,         // This value will be ignored since we aren't using PRS
-    .cufoa      = timerOutputActionNone,  // No action on underflow (up-count mode)
-    .cofoa      = timerOutputActionSet,   // On overflow, we want the output to go high, but in PWM mode this should happen automatically
-    .cmoa       = timerOutputActionClear, // On compare match, we want output to clear, but in PWM mode this should happen automatically
-    .mode       = timerCCModePWM,         // Set timer channel to run in PWM mode
-    .filter     = false,                  // Not using input, so don't need a filter
-    .prsInput   = false,                  // Not using PRS
-    .coist      = false,                  // Initial state for PWM is high when timer is enabled
-    .outInvert  = false,                  // non-inverted output
-  };
+}
 
-  // Setup Timer Configuration for PWM
-  TIMER_Init_TypeDef timerPWMInit =
-  {
-    .enable     = true,                 // start timer upon configuration
-    .debugRun   = true,                 // run timer in debug mode
-    .prescale   = timerPrescale1,       // set prescaler to /1
-    .clkSel     = timerClkSelHFPerClk,  // set clock source as HFPERCLK
-    .fallAction = timerInputActionNone, // no action from inputs
-    .riseAction = timerInputActionNone, // no action from inputs
-    .mode       = timerModeUp,          // use up-count mode
-    .dmaClrAct  = false,                // not using DMA
-    .quadModeX4 = false,                // not using Quad Dec. mode
-    .oneShot    = false,                // not using one shot mode
-    .sync       = false,                // not syncronizing timer3 with other timers
-  };
+void TIMER3_IRQHandler(void)
+{
 
-  //Setup Timer Configuration for general purpose use
-  TIMER_Init_TypeDef timerGPInit =
-  {
-    .enable     = true,                 // start timer upon configuration
-    .debugRun   = true,                 // run timer in debug mode
-    .prescale   = timerPrescale1,       // set prescaler to /1
-    .clkSel     = timerClkSelHFPerClk,  // set clock source as HFPERCLK
-    .fallAction = timerInputActionNone, // no action from inputs
-    .riseAction = timerInputActionNone, // no action from inputs
-    .mode       = timerModeUp,          // use up-count mode
-    .dmaClrAct  = false,                // not using DMA
-    .quadModeX4 = false,                // not using Quad Dec. mode
-    .oneShot    = false,                // not using one shot mode
-    .sync       = false,                // not syncronizing timer3 with other timers
-  };
+}
 
-  TIMER_TopSet(TIMER0, TOP_VAL_PWM);      		// GP Timer period will be 1ms = 1kHz freq
-  TIMER_TopSet(TIMER3, TOP_VAL_PWM);           // PWM period will be 1ms = 1kHz freq
+uint32_t us_to_comparevalue(uint32_t us)
+{
 
-  TIMER_CounterSet(TIMER0, 0);                 // Start counter at 0 (up-count mode)
-  TIMER_CounterSet(TIMER3, 0);                 // Start counter at 0 (up-count mode)
+	uint32_t hz_to_us = 1000000 / THRUSTER_PWM_FREQ;
 
-  TIMER_CompareSet(TIMER3, 2, compare_val);    // Set CC2 compare value (0% duty)
-  TIMER_CompareBufSet(TIMER3, 2, compare_val); // Set CC2 compare buffer value (0% duty)
+	if((us < 1100) || (us > 1900))
+	{
+		return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * THRUSTER_START_PULSE_WIDTH_US) / hz_to_us;
+	}
 
-  TIMER_IntEnable(TIMER0, TIMER_IF_OF);        // Enable Timer0 overflow interrupt
-  NVIC_EnableIRQ(TIMER0_IRQn);                 // Enable Timer0 interrupt vector in NVIC
+	return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * us) / hz_to_us;
+}
 
-  TIMER_InitCC(TIMER3, 2, &timerCCInit);       // apply channel configuration to Timer3 channel 2
-  TIMER3->ROUTE = (1 << 16) |(1 << 2);         // connect PWM output (timer3, channel 2) to PE2 (LED0). See EFM32GG990 datasheet for details.
+void initPwm(void)
+{
 
-  TIMER_Init(TIMER0, &timerGPInit);            // apply general purpose configuration to timer0
-  TIMER_Init(TIMER3, &timerPWMInit);           // apply PWM configuration to timer3
+	// Enable clock for GPIO module
+	CMU_ClockEnable(cmuClock_GPIO, true);
+
+	// Enable clock for TIMERn modules
+	CMU_ClockEnable(cmuClock_TIMER0, true);
+	CMU_ClockEnable(cmuClock_TIMER1, true);
+	CMU_ClockEnable(cmuClock_TIMER2, true);
+
+	// Set compare channel pins for thruster PWM as output
+	GPIO_PinModeSet(gpioPortD, 1, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortD, 2, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortD, 3, gpioModePushPull, 0);
+
+	GPIO_PinModeSet(gpioPortD, 6, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortD, 7, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 0);
+
+	GPIO_PinModeSet(gpioPortA, 12, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortA, 13, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortA, 14, gpioModePushPull, 0);
+
+	GPIO_PinModeSet(gpioPortE, 0, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortE, 1, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortE, 2, gpioModePushPull, 0);
+
+	// Setup and initialize timers
+	initTimer(TIMER0, THRUSTER_PWM_FREQ, THRUSTER_START_PULSE_WIDTH_US, TIMER0_CC_LOCATION);
+	initTimer(TIMER1, THRUSTER_PWM_FREQ, THRUSTER_START_PULSE_WIDTH_US, TIMER1_CC_LOCATION);
+	initTimer(TIMER2, THRUSTER_PWM_FREQ, THRUSTER_START_PULSE_WIDTH_US, TIMER2_CC_LOCATION);
+	initTimer(TIMER3, LED_PWM_FREQ, 	 LED_START_PULSE_WIDTH_US,		TIMER3_CC_LOCATION);
+
+	// Enable TIMERn interrupt vector in NVIC
+	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(TIMER1_IRQn);
+	NVIC_EnableIRQ(TIMER2_IRQn);
+	NVIC_EnableIRQ(TIMER3_IRQn);
+
+}
+
+void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us, uint32_t cc_location)
+{
+	// Reset timer
+	TIMER_Reset(timer);
+
+	TIMER_InitCC_TypeDef timerCCInit =
+	{
+		.eventCtrl  = timerEventEveryEdge,
+		.edge       = timerEdgeBoth,
+		.prsSel     = timerPRSSELCh0,
+		.cufoa      = timerOutputActionNone,
+		.cofoa      = timerOutputActionNone,
+		.cmoa       = timerOutputActionToggle,
+		.mode       = timerCCModePWM,
+		.filter     = false,
+		.prsInput   = false,
+		.coist      = false,
+		.outInvert  = false,
+	};
+
+	// Initialize CC channels 0-2
+	TIMER_InitCC(timer, 0, &timerCCInit);
+	TIMER_InitCC(timer, 1, &timerCCInit);
+	TIMER_InitCC(timer, 2, &timerCCInit);
+
+	// Route CCn to location and enable pin
+	timer->ROUTE |= (TIMER_ROUTE_CC0PEN | cc_location);
+	timer->ROUTE |= (TIMER_ROUTE_CC1PEN | cc_location);
+	timer->ROUTE |= (TIMER_ROUTE_CC2PEN | cc_location);
+
+	// Select timer parameters
+	TIMER_Init_TypeDef timerInit =
+	{
+		.enable     = true,
+		.debugRun   = true,
+		.prescale   = timerPrescale1,
+		.clkSel     = timerClkSelHFPerClk,
+		.fallAction = timerInputActionNone,
+		.riseAction = timerInputActionNone,
+		.mode       = timerModeUp,
+		.dmaClrAct  = false,
+		.quadModeX4 = false,
+		.oneShot    = false,
+		.sync       = false,
+	};
+
+	// Set Top Value
+	TIMER_TopSet(timer, CMU_ClockFreqGet(cmuClock_HFPER)/pwm_freq);
+
+	uint32_t compareValue = us_to_comparevalue(pulse_width_us);
+
+	// Set initial compare value for channels 0-2
+	TIMER_CompareBufSet(timer, 0, compareValue);
+	TIMER_CompareBufSet(timer, 1, compareValue);
+	TIMER_CompareBufSet(timer, 2, compareValue);
+
+	// Enable overflow interrupt
+	TIMER_IntEnable(timer, TIMER_IF_OF);
+
+	// Configure timer
+	TIMER_Init(timer, &timerInit);
 }

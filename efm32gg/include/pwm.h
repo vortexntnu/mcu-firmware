@@ -1,21 +1,32 @@
 #ifndef PWM_H
 #define PWM_H
 
-
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_timer.h"
 
-#define TOP_VAL_PWM 100000     // sets PWM frequency to 1kHz (1MHz timer clock)
-#define TOP_VAL_GP_TIMER 1000   // sets general purpose timer overflow frequency to 1kHz (1MHz timer clock)
-#define UPDATE_PERIOD 5       // update compare value, toggle LED1 every 1/4 second (250ms)
-#define INC_VAL (TOP_VAL_PWM/4) // adjust compare value amount
+#define PWM_OUTPUT_PORT gpioPortD
+#define TIMER0_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
+#define TIMER1_CC_LOCATION TIMER_ROUTE_LOCATION_LOC4
+#define TIMER2_CC_LOCATION TIMER_ROUTE_LOCATION_LOC1
+#define TIMER3_CC_LOCATION TIMER_ROUTE_LOCATION_LOC1
 
+#define LED_PWM_FREQ 500
+#define LED_START_PULSE_WIDTH_US 1500
 
-void init_Pwm(void);
+#define THRUSTER_PWM_FREQ 500
+#define THRUSTER_START_PULSE_WIDTH_US 1500
+
+#define NUM_THRUSTERS 8
+
+void initPwm(void);
+void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_freq, uint32_t cc_location);
+uint32_t us_to_comparevalue(uint32_t us);
+
 void TIMER0_IRQHandler(void);
-void generate_PWM(void);
-char getCounter();
+void TIMER1_IRQHandler(void);
+void TIMER2_IRQHandler(void);
+void TIMER3_IRQHandler(void);
 
 #endif //PWM_H_

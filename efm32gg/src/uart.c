@@ -59,7 +59,7 @@ void initUart(void)
 	CMU->HFPERCLKEN0 = (1 << 13) | (1 << 1);        // Enable GPIO, and USART1 peripheral clocks
 
 	GPIO->P[COM_PORT].MODEL = (1 << 4) | (4 << 0);  // Configure PD0 as digital output and PD1 as input
-	GPIO->P[COM_PORT].DOUTSET = (1 << USART_TX_pin); // Initialize PD0 high since UART TX idles high (otherwise glitches can occur)
+	GPIO->P[COM_PORT].DOUTSET = (1 << USART_TX_pin);// Initialize PD0 high since UART TX idles high (otherwise glitches can occur)
 
 	USART_IntClear(USART1, _USART_IF_MASK);
 	USART_IntEnable(USART1, USART_IF_RXDATAV);
