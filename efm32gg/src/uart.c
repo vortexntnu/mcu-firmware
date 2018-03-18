@@ -10,30 +10,41 @@ volatile struct circularBuffer
   bool     overflow;          	// buffer overflow indicator
 }receiveBuff, transmitBuff = { {0}, 0, 0, 0, false };
 
+volatile struct dummyStruct
+{
+	uint8_t 	magic;				// start transmission byte
+	uint8_t 	type;				// message type
+	uint8_t 	payload[BUFFERSIZE];// payload
+	uint16_t 	crc_bytes;         	// crc bytes
+	uint16_t 	writeIndex;        	// write index
+	uint16_t 	pendingBytes;		// number of unread bytes
+	bool     	overflow;          	// buffer overflow indicator
+};
+
 void USART1_RX_IRQHandler(void)
 {
-	if(USART1->STATUS & USART_STATUS_RXDATAV)
+	if(UART->STATUS & USART_STATUS_RXDATAV)
 	{
-		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(USART1);
+		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(UART);
 
 		//send back data for debugging
 		uartPutData(&receiveBuff.data[receiveBuff.writeIndex]);
 
-		if(receiveBuff.pendingBytes++ >= BUFFERSIZE) receiveBuff.pendingBytes = BUFFERSIZE;
+		if(++receiveBuff.pendingBytes >= BUFFERSIZE) receiveBuff.pendingBytes = BUFFERSIZE;
 
-		if(receiveBuff.writeIndex++ >= BUFFERSIZE-1)
+		if(++receiveBuff.writeIndex >= BUFFERSIZE-1)
 		{
 			receiveBuff.overflow = true;
 			receiveBuff.writeIndex = 0;
 		}
 
-		//USART_IntClear(UART, USART_IF_RXDATAV);
+		USART_IntClear(UART, USART_IF_RXDATAV);
 	}
 }
 
 void uartPutData(uint8_t *data)
 {
-    USART_Tx(USART1, *data);
+    USART_Tx(UART, *data);
 }
 
 void uartGetData(uint8_t *data)
@@ -48,35 +59,54 @@ void uartGetData(uint8_t *data)
 
 void initUart(void)
 {
-	USART_Reset(USART1);
+	USART_Reset(UART);
 
-	CMU->CTRL |= (1 << 14); 	                    // Set HF clock divider to /2 to keep core frequency <32MHz
-	CMU->OSCENCMD |= 0x4;                           // Enable XTAL Oscillator
+	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
 
-	while(! (CMU->STATUS & 0x8) );                  // Wait for XTAL osc to stabilize
-	CMU->CMD = 0x2;                                 // Select HF XTAL osc as system clock source. 48MHz XTAL, but we divided the system clock by 2, therefore our HF clock should be 24MHz
+	// Start HFXO and wait until it is stable
+	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
 
-	CMU->HFPERCLKEN0 = (1 << 13) | (1 << 1);        // Enable GPIO, and USART1 peripheral clocks
+	 // Select HFXO as clock source for HFCLK
+	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
 
-	GPIO->P[COM_PORT].MODEL = (1 << 4) | (4 << 0);  // Configure PD0 as digital output and PD1 as input
-	GPIO->P[COM_PORT].DOUTSET = (1 << USART_TX_pin);// Initialize PD0 high since UART TX idles high (otherwise glitches can occur)
+	// Enable clock for USART module
+	CMU_ClockEnable(cmuClock_USART1, true);
 
-	USART_IntClear(USART1, _USART_IF_MASK);
-	USART_IntEnable(USART1, USART_IF_RXDATAV);
+	// Enable clock for GPIO module (required for pin configuration)
+	CMU_ClockEnable(cmuClock_GPIO, true);
 
+	// Configure GPIO pins
+	GPIO_PinModeSet(UART_PORT, UART_TX_PIN, gpioModePushPull, 1);
+	GPIO_PinModeSet(UART_PORT, UART_RX_PIN, gpioModeInput, 0);
+
+	// Prepare struct for initializing UART in asynchronous mode
+	USART_InitAsync_TypeDef uartInit = USART_INITASYNC_DEFAULT;
+
+	uartInit.enable       = usartDisable;  	// Don't enable UART upon intialization
+	uartInit.refFreq      = 0;              // Provide information on reference frequency. When set to 0, the reference frequency is
+	uartInit.baudrate     = 115200;        	// Baud rate
+	uartInit.oversampling = usartOVS16;     // Oversampling. Range is 4x, 6x, 8x or 16x
+	uartInit.databits     = usartDatabits8; // Number of data bits. Range is 4 to 10
+	uartInit.parity       = usartNoParity;  // Parity mode
+	uartInit.stopbits     = usartStopbits1; // Number of stop bits. Range is 0 to 2
+	uartInit.mvdis        = false;          // Disable majority voting
+	uartInit.prsRxEnable  = false;          // Enable USART Rx via Peripheral Reflex System
+	uartInit.prsRxCh      = usartPrsRxCh0;  // Select PRS channel if enabled
+
+	// Initialize USART with uartInit struct
+	USART_InitAsync(UART, &uartInit);
+
+	// Prepare UART Rx and Tx interrupts
+	USART_IntClear(UART, _UART_IF_MASK);
+	USART_IntEnable(UART, UART_IF_RXDATAV);
 	NVIC_ClearPendingIRQ(USART1_RX_IRQn);
+	NVIC_ClearPendingIRQ(USART1_TX_IRQn);
 	NVIC_EnableIRQ(USART1_RX_IRQn);
+	NVIC_EnableIRQ(USART1_TX_IRQn);
 
-	//NVIC_ClearPendingIRQ(USART1_TX_IRQn);
-	//NVIC_EnableIRQ(USART1_TX_IRQn);
+	// Enable UART RX/TX PINS on UART_LOCATION
+	UART->ROUTE = UART_ROUTE_RXPEN | UART_ROUTE_TXPEN | UART_LOCATION;
 
-
-	// Use default value for USART1->CTRL: asynch mode, x16 OVS, lsb first, CLK idle low
-	// Default frame options: 8-none-1-none
-	USART1->CLKDIV = (152 << 6);                           		// 152 will give 38400 baud rate, 51 will give 115200 baud rate (using 16-bit oversampling with 24MHz peripheral clock)
-	USART1->CMD = (1 << 11) | (1 << 10) | (1 << 2) | (1 << 0); 	// Clear RX/TX buffers and shif regs, Enable Transmitter and Receiver
-	USART1->IFC = 0x1FF9;                                      	// clear all USART interrupt flags
-	USART1->ROUTE = 0x103;                                     	// Enable TX and RX pins, use location #1 (UART TX and RX located at PD0 and PD1, see EFM32GG990 datasheet for details)
-
+	// Enable UART
+	USART_Enable(UART, usartEnable);
 }
-

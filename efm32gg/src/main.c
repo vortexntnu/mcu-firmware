@@ -9,24 +9,26 @@ int main() {
 	CHIP_Init();
 
 	initUart();
-
 	initPwm();
 
-	//uint32_t i,c, d;
-	//char hello_world[] = "\n\rHello World!\n\r";
+	uint32_t i;
 
-	//uint8_t receive_data;
+	char hello_world[] = "\n\rHello World!\n\r";
 
-	//for(i=0; i<strlen(hello_world); i++) USART_Tx(USART1, hello_world[i]);
+	uint8_t receive_data;
 
-	//GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
-	//GPIO_PinOutSet(gpioPortE, 3);
+	for (i = 0; i < strlen(hello_world); i++)
+	{
+		USART_Tx(USART1, hello_world[i]);
+	}
 
-	while(1){
+	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
+	GPIO_PinOutSet(gpioPortE, 3);
 
-		//uartGetData(&receive_data);
+	while (1)
+	{
 
-		//for(i=0; i<strlen(hello_world); i++) USART_Tx(USART1, hello_world[i]);
+		uartGetData(&receive_data);
 
 	}
 
