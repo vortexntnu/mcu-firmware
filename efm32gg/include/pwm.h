@@ -6,6 +6,12 @@
 #include "em_gpio.h"
 #include "em_timer.h"
 
+enum pwm_states
+{
+	THRUSTER_PWM_UPDATE_FAIL,
+	THRUSTER_PWM_UPDATE_OK,
+};
+
 #define TIMER_ROUTE_CCPEN(ch) (0x1UL << ch)
 
 #define TIMER0_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
@@ -67,10 +73,12 @@ void initTimer(TIMER_TypeDef *timer,
 				uint32_t cc_location,
 				int num_channels);
 uint32_t us_to_comparevalue(uint32_t us);
+uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr);
 
 void TIMER0_IRQHandler(void);
 void TIMER1_IRQHandler(void);
 void TIMER2_IRQHandler(void);
 void TIMER3_IRQHandler(void);
+
 
 #endif //PWM_H_
