@@ -15,11 +15,9 @@ int main() {
 
 	char hello_world[] = "\n\rHello World!\n\r";
 
-	uint8_t receive_data;
-
 	for (i = 0; i < strlen(hello_world); i++)
 	{
-		USART_Tx(USART1, hello_world[i]);
+		USART_Tx(UART, hello_world[i]);
 	}
 
 	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
@@ -27,8 +25,19 @@ int main() {
 
 	while (1)
 	{
-
-		uartGetData(&receive_data);
+		switch (receive_vortex_msg())
+		{
+			case MAGIC_BYTES_NOT_RECEIVED:
+				break;
+			case RECEIVE_OK:
+				send_vortex_msg(ACK_MSG);
+				break;
+			case RECEIVE_FAIL:
+				send_vortex_msg(NOACK_MSG);
+				break;
+			default:
+				break;
+		}
 
 	}
 
