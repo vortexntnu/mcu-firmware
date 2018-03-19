@@ -1,7 +1,6 @@
 #include "uart.h"
 #include "efm32gg990f1024.h"
 
-
 struct circularBuffer
 {
   uint8_t 	data[BUFFERSIZE];		// data buffer
@@ -12,6 +11,16 @@ struct circularBuffer
   bool		received_start_byte;	// MAGIC_START_BYTE is received
   bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
 } receiveBuff, transmitBuff = { {0}, 0, 0, -1, -1, false, false };
+
+struct vortex_msg
+{
+	uint8_t 	magic_start;				// start transmission byte
+	uint8_t 	type;						// message type
+	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
+	uint8_t 	crc_byte1;         			// crc byte
+	uint8_t 	crc_byte2;					// crc byte
+	uint8_t		magic_stop;					// stop transmission byte
+}message = { 0, 0, {0}, 0, 0, 0 };
 
 void USART1_RX_IRQHandler(void)
 {
@@ -36,7 +45,7 @@ void USART1_RX_IRQHandler(void)
 			receiveBuff.stop_byte_index = receiveBuff.writeIndex;
 		}
 
-		if((receiveBuff.received_start_byte == true)
+		if ((receiveBuff.received_start_byte == true)
 			&& 	(receiveBuff.writeIndex < receiveBuff.start_byte_index))
 		{
 			if (((receiveBuff.writeIndex + BUFFERSIZE) - receiveBuff.start_byte_index) > VORTEX_MSG_MAX_SIZE)
@@ -46,7 +55,7 @@ void USART1_RX_IRQHandler(void)
 			}
 		}
 
-		if(++receiveBuff.writeIndex >= BUFFERSIZE)
+		if (++receiveBuff.writeIndex >= BUFFERSIZE)
 		{
 			receiveBuff.writeIndex = 0;
 		}
@@ -175,7 +184,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	return MSG_STATE_RECEIVE_OK;
 }
 
-uint8_t send_vortex_msg( msg_flag type)
+uint8_t send_vortex_msg(msg_flag type)
 {
 	switch(type)
 	{

@@ -1,6 +1,8 @@
 #ifndef VORTEX_MSG_H
 #define VORTEX_MSG_H
 
+#include <stdint.h>
+
 #define MAGIC_START_BYTE 	0x24
 #define MAGIC_STOP_BYTE 	0x40
 
@@ -8,16 +10,6 @@
 #define VORTEX_MSG_MAX_SIZE 21
 #define VORTEX_MSG_TYPE_INDEX 2
 #define VORTEX_MSG_START_DATA_INDEX 3
-
-struct vortex_msg
-{
-	uint8_t 	magic_start;				// start transmission byte
-	uint8_t 	type;						// message type
-	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
-	uint8_t 	crc_byte1;         			// crc byte
-	uint8_t 	crc_byte2;					// crc byte
-	uint8_t		magic_stop;					// stop transmission byte
-}message = { 0, 0, {0}, 0, 0, 0 };
 
 typedef enum msg_flag
 {
