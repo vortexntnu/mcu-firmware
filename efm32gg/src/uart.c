@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "efm32gg990f1024.h"
 
+
 struct circularBuffer
 {
   uint8_t 	data[BUFFERSIZE];		// data buffer
@@ -12,17 +13,6 @@ struct circularBuffer
   bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
 } receiveBuff, transmitBuff = { {0}, 0, 0, -1, -1, false, false };
 
-struct vortex_msg
-{
-	uint8_t 	magic_start;				// start transmission byte
-	uint8_t 	type;						// message type
-	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
-	uint8_t 	crc_byte1;         			// crc byte
-	uint8_t 	crc_byte2;					// crc byte
-	uint8_t		magic_stop;					// stop transmission byte
-}message = { 0, 0, {0}, 0, 0, 0 };
-
-
 void USART1_RX_IRQHandler(void)
 {
 	if (UART->STATUS & USART_STATUS_RXDATAV)
@@ -33,24 +23,27 @@ void USART1_RX_IRQHandler(void)
 		//USART_Tx(UART, &receiveBuff.data[receiveBuff.writeIndex]);
 
 		if (receiveBuff.data[receiveBuff.writeIndex] == MAGIC_START_BYTE
-			&& (receiveBuff.received_start_byte == false))
+			&& receiveBuff.received_start_byte == false)
 		{
 			receiveBuff.received_start_byte = true;
 			receiveBuff.start_byte_index = receiveBuff.writeIndex;
 		}
 
-		if (receiveBuff.data[receiveBuff.writeIndex] == MAGIC_STOP_BYTE
+		if ((receiveBuff.data[receiveBuff.writeIndex] == MAGIC_STOP_BYTE)
 			&& (receiveBuff.received_start_byte == true))
 		{
 			receiveBuff.received_stop_byte = true;
 			receiveBuff.stop_byte_index = receiveBuff.writeIndex;
 		}
 
-		if(receiveBuff.received_start_byte == true
-		   && ((receiveBuff.writeIndex - receiveBuff.start_byte_index) > VORTEX_MSG_MAX_SIZE))
+		if((receiveBuff.received_start_byte == true)
+			&& 	(receiveBuff.writeIndex < receiveBuff.start_byte_index))
 		{
-			receiveBuff.received_start_byte = false;
-			receiveBuff.received_stop_byte = false;
+			if (((receiveBuff.writeIndex + BUFFERSIZE) - receiveBuff.start_byte_index) > VORTEX_MSG_MAX_SIZE)
+			{
+				receiveBuff.received_start_byte = false;
+				receiveBuff.received_stop_byte = false;
+			}
 		}
 
 		if(++receiveBuff.writeIndex >= BUFFERSIZE)
@@ -122,46 +115,74 @@ uint8_t magic_bytes_received(void)
 {
 	if (receiveBuff.received_start_byte && receiveBuff.received_stop_byte)
 	{
-		return MAGIC_BYTES_RECEIVED;
+		return MSG_STATE_MAGIC_BYTES_RECEIVED;
 	}
 	else
 	{
-		return MAGIC_BYTES_NOT_RECEIVED;
+		return MSG_STATE_MAGIC_BYTES_NOT_RECEIVED;
 	}
 }
 
-uint8_t receive_vortex_msg(void)
+uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 {
-	if (magic_bytes_received() == MAGIC_BYTES_NOT_RECEIVED)
+	if (magic_bytes_received() == MSG_STATE_MAGIC_BYTES_NOT_RECEIVED)
 	{
-		return MAGIC_BYTES_NOT_RECEIVED;
+		return MSG_STATE_MAGIC_BYTES_NOT_RECEIVED;
 	}
 
 	int i;
 	uint8_t start_index = receiveBuff.start_byte_index;
 	uint8_t stop_index = receiveBuff.stop_byte_index;
 
-	if (start_index < 0 || stop_index < 0 || (start_index == stop_index))
+	if ((start_index < 0) || (stop_index < 0) || (start_index == stop_index))
 	{
 		receiveBuff.received_start_byte = false;
 		receiveBuff.received_stop_byte = false;
-		return RECEIVE_FAIL;
+		return MSG_STATE_RECEIVE_FAIL;
 	}
 
-	for (i = start_index; i <= stop_index; i++)
+	if(start_index > stop_index)
 	{
-		USART_Tx(UART, receiveBuff.data[i]);
+		*receive_data_ptr = (stop_index + BUFFERSIZE + 1) - start_index;
+		receive_data_ptr++;
+		for (i = start_index; i < BUFFERSIZE; i++)
+		{
+			*receive_data_ptr = receiveBuff.data[i];
+			receive_data_ptr++;
+		}
+
+		for (i = 0; i <= stop_index; i++)
+		{
+			*receive_data_ptr = receiveBuff.data[i];
+			receive_data_ptr++;
+		}
+	}
+	else
+	{
+		*receive_data_ptr = stop_index - start_index + 1;
+		receive_data_ptr++;
+		for (i = start_index; i <= stop_index; i++)
+		{
+			*receive_data_ptr = receiveBuff.data[i];
+			receive_data_ptr++;
+		}
 	}
 
 	receiveBuff.received_start_byte = false;
 	receiveBuff.received_stop_byte = false;
 
-	return RECEIVE_OK;
+
+	return MSG_STATE_RECEIVE_OK;
 }
 
-uint8_t send_vortex_msg(enum msg_type type)
+uint8_t send_vortex_msg( msg_flag type)
 {
-	return SEND_FAIL;
+	switch(type)
+	{
+		default:
+			return MSG_STATE_SEND_FAIL;
+	}
+
 }
 
 
