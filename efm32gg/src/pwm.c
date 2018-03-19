@@ -1,32 +1,10 @@
 #include "pwm.h"
-
-uint32_t compareValue_1 = 0;
-int k_1 = 1;
+#include "uart.h"
 
 // TIMER ISR executes at 500 Hz
 void TIMER0_IRQHandler(void)
 {
-
-
-	if(++compareValue_1 >= 300)
-	{
-		compareValue_1 = 0;
-
-		if(k_1==1)
-		{
-			TIMER_CompareBufSet(TIMER0, 0, us_to_comparevalue(1500));
-			k_1 = 0;
-		}
-		else
-		{
-			TIMER_CompareBufSet(TIMER0, 0, us_to_comparevalue(1400));
-			k_1 = 1;
-		}
-	}
-
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);
-
-
 }
 
 void TIMER1_IRQHandler(void)
@@ -47,7 +25,6 @@ void TIMER3_IRQHandler(void)
 
 uint32_t us_to_comparevalue(uint32_t us)
 {
-
 	uint32_t hz_to_us = 1000000 / THRUSTER_PWM_FREQ;
 
 	if((us < THRUSTER_MIN_PULSE_WIDTH_US) || (us > THRUSTER_MAX_PULSE_WIDTH_US))
@@ -58,9 +35,33 @@ uint32_t us_to_comparevalue(uint32_t us)
 	return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * us) / hz_to_us;
 }
 
+uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
+{
+	int i;
+	uint16_t pwm_data[NUM_THRUSTERS] = {0};
+
+	//TODO: convert the 16 bytes in pwm_data_ptr to 8 uint16_t
+
+	for (i = 0; i < NUM_THRUSTERS; i++)
+	{
+		pwm_data[i] = 1337 + *pwm_data_ptr;
+		pwm_data_ptr++;
+	}
+
+	int ch;
+
+	for (ch = 0; ch < 3; ch++)
+	{
+		TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch]));
+		TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3]));
+		TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
+	}
+
+	return THRUSTER_PWM_UPDATE_OK;
+}
+
 void initPwm(void)
 {
-
 	// Enable clock for GPIO module
 	CMU_ClockEnable(cmuClock_GPIO, true);
 
@@ -158,7 +159,7 @@ void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us,
 
 	uint32_t compareValue = us_to_comparevalue(pulse_width_us);
 
-	// Set initial compare value for compare_channels
+	// Set initial compare value for compare channels
 	for (ch = 0; ch < num_channels; ch++)
 	{
 		TIMER_CompareBufSet(timer, ch, compareValue);
