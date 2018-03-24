@@ -41,10 +41,13 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 	uint16_t pwm_data[NUM_THRUSTERS] = {0};
 
 	//TODO: convert the 16 bytes in pwm_data_ptr to 8 uint16_t
+	//cmd1 = (uint16_t)((cmd[0] << 8) & 0xFF00) | (uint16_t)(cmd[1] & 0x00FF);
 
 	for (i = 0; i < NUM_THRUSTERS; i++)
 	{
-		pwm_data[i] = 1337 + *pwm_data_ptr;
+		pwm_data[i] = (uint16_t)((*pwm_data_ptr << 8) & 0xFF00);
+		pwm_data_ptr++;
+		pwm_data[i] |= (uint16_t)((*pwm_data_ptr) & 0x00FF);
 		pwm_data_ptr++;
 	}
 
@@ -101,13 +104,20 @@ void initPwm(void)
 	NVIC_EnableIRQ(TIMER1_IRQn);
 	NVIC_EnableIRQ(TIMER2_IRQn);
 	NVIC_EnableIRQ(TIMER3_IRQn);
-
 }
 
 void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us, uint32_t cc_location, int num_channels)
 {
 	// Reset timer
 	TIMER_Reset(timer);
+
+	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
+
+	// Start HFXO and wait until it is stable
+	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+
+	 // Select HFXO as clock source for HFCLK
+	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFXO);
 
 	TIMER_InitCC_TypeDef timerCCInit =
 	{
