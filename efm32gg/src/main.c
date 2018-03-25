@@ -5,8 +5,9 @@
 #include "vortex_msg.h"
 #include "efm32gg990f1024.h"
 #include "crc.h"
+#include "watchdog.h"
 
-
+bool crc_passed(uint8_t * receive_data);
 
 int main() {
 
@@ -14,6 +15,7 @@ int main() {
 
 	initUart();
 	initPwm();
+	initWdog();
 
 	uint32_t i;
 
@@ -24,28 +26,22 @@ int main() {
 
 	uint8_t msg_type = MSG_TYPE_NOTYPE;
 
-	char hello_world[] = "\n\rHello World!\n\r";
+	char startup_msg[] = "$START UP EFM32GG@";
 
-	for (i = 0; i < strlen(hello_world); i++)
+	for (i = 0; i < strlen(startup_msg); i++)
 	{
-		USART_Tx(UART, hello_world[i]);
+		USART_Tx(UART, startup_msg[i]);
 	}
 
 	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
 	GPIO_PinOutSet(gpioPortE, 3);
-
-	uint16_t crc_checksum_calc, crc_checksum_received = 0;
 
 	while (1)
 	{
 		switch (receive_vortex_msg(receive_data_ptr))
 		{
 			case MSG_STATE_RECEIVE_OK:
-				crc_checksum_calc = crc_16(&receive_data[VORTEX_MSG_START_DATA_INDEX], MAX_PAYLOAD_SIZE);
-				crc_checksum_received = (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX] << 8) & 0xFF00)
-										| (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX+1]) & 0x00FF);
-
-				if (crc_checksum_calc == crc_checksum_received)
+				if (crc_passed(&receive_data[0]) == true)
 				{
 					send_vortex_msg(MSG_TYPE_ACK);
 					msg_type = receive_data[VORTEX_MSG_TYPE_INDEX];
@@ -56,6 +52,7 @@ int main() {
 					msg_type = MSG_TYPE_NOACK;
 				}
 				received_msg = true;
+				WDOGn_Feed(WDOG);
 				break;
 
 			case MSG_STATE_RECEIVE_FAIL:
@@ -64,11 +61,6 @@ int main() {
 
 			default:
 				msg_type = MSG_TYPE_NOTYPE;
-				if (received_msg == true)
-				{
-					send_vortex_msg(MSG_TYPE_NOACK);
-					received_msg = false;
-				}
 				break;
 		}
 
@@ -93,22 +85,30 @@ int main() {
 				break;
 
 			case MSG_TYPE_HEARTBEAT:
-
+				WDOGn_Feed(WDOG);
 				break;
 
 			default:
 				break;
 		}
-
-		/*for (i = 1; i <= receive_data[0]; i++)
-		{
-			USART_Tx(UART, receive_data[i]);
-		}*/
-
-		/*for (i = 0; i < VORTEX_MSG_MAX_SIZE; i++)
-		{
-			receive_data[i] = 0;
-		}*/
 	}
+}
 
+bool crc_passed(uint8_t * receive_data)
+{
+	uint16_t crc_checksum_calc = 0;
+	uint16_t crc_checksum_received = 1;
+
+	crc_checksum_calc = crc_16(&receive_data[VORTEX_MSG_START_DATA_INDEX], MAX_PAYLOAD_SIZE);
+	crc_checksum_received = (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX] << 8) & 0xFF00)
+							| (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX+1]) & 0x00FF);
+
+	if (crc_checksum_calc == crc_checksum_received)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
