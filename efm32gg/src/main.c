@@ -1,9 +1,11 @@
 #include <string.h>
 
+#include "em_rmu.h"
+#include "efm32gg990f1024.h"
+
 #include "uart.h"
 #include "pwm.h"
 #include "vortex_msg.h"
-#include "efm32gg990f1024.h"
 #include "crc.h"
 #include "watchdog.h"
 
@@ -12,26 +14,35 @@ bool crc_passed(uint8_t * receive_data);
 int main() {
 
 	CHIP_Init();
-
 	initUart();
 	initPwm();
 	initWdog();
 
+	unsigned long resetCause = RMU_ResetCauseGet();
+	RMU_ResetCauseClear();
+
+	char startup_msg[50];
+
+	if (resetCause & RMU_RSTCAUSE_WDOGRST)
+	{
+		strcpy(&startup_msg[0], "$ MCU reset by watchdog, starting... @\n\r");
+	}
+	else
+	{
+		strcpy(&startup_msg[0], "$ MCU starting... @\n\r");
+	}
+
 	uint32_t i;
-
-	bool received_msg = false;
-
-	uint8_t receive_data[VORTEX_MSG_MAX_SIZE] = {0};
-	uint8_t *receive_data_ptr = &receive_data[0];
-
-	uint8_t msg_type = MSG_TYPE_NOTYPE;
-
-	char startup_msg[] = "$START UP EFM32GG@";
 
 	for (i = 0; i < strlen(startup_msg); i++)
 	{
 		USART_Tx(UART, startup_msg[i]);
 	}
+
+	uint8_t receive_data[VORTEX_MSG_MAX_SIZE] = {0};
+	uint8_t *receive_data_ptr = &receive_data[0];
+
+	uint8_t msg_type = MSG_TYPE_NOTYPE;
 
 	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
 	GPIO_PinOutSet(gpioPortE, 3);
@@ -51,7 +62,7 @@ int main() {
 					send_vortex_msg(MSG_TYPE_NOACK);
 					msg_type = MSG_TYPE_NOACK;
 				}
-				received_msg = true;
+
 				WDOGn_Feed(WDOG);
 				break;
 
