@@ -1,8 +1,7 @@
-#ifndef UART_H_
-#define UART_H_
+#ifndef UART_H
+#define UART_H
 
 #include "vortex_msg.h"
-
 #include "em_chip.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -20,9 +19,8 @@ extern struct circularBuffer receiveBuff;
 #define UART_RX_PIN 6
 
 void initUart(void);
-void setupUart(void);
+void send_vortex_msg(msg_type type);
 uint8_t magic_bytes_received(void);
 uint8_t receive_vortex_msg(uint8_t *receive_data_ptr);
-uint8_t send_vortex_msg(msg_flag type);
 
 #endif //UART_H_
