@@ -88,8 +88,8 @@ void SerialCom::callback(const vortex_msgs::Pwm& msg)
 		 	  << m_cmd[MSG_TYPE_INDEX];
 
 	uint8_t char1, char2;
-	char1 = (uint8_t)(msg.positive_width_us[1]  >> 8);    // get the high 8 bits
-	char2 = (uint8_t)(msg.positive_width_us[1]  & 0xFF);  // isolate the low 8 bits
+	char1 = (uint8_t)(msg.positive_width_us[0]  >> 8);    // get the high 8 bits
+	char2 = (uint8_t)(msg.positive_width_us[0]  & 0xFF);  // isolate the low 8 bits
 
     int i;
 	for (i = MSG_PAYLOAD_START_INDEX; 
@@ -97,27 +97,59 @@ void SerialCom::callback(const vortex_msgs::Pwm& msg)
 		 i++)
 	{
 		if ((i % 2) == 0)
-			m_cmd[i] = (char)char1;
+			m_cmd[i] = char1;
 		else
-			m_cmd[i] = (char)char2;
+			m_cmd[i] = char2;
 
 		printf(" %d ", m_cmd[i]);
 	}
 
 	std::cout << m_cmd[MAGIC_STOP_BYTE_INDEX] << std::endl;
 
-	int n = serial_write(&m_cmd[0], MAX_MSG_SIZE);
+	uint16_t checksum = crc_checksum(&m_cmd[MSG_PAYLOAD_START_INDEX], (MSG_PAYLOAD_STOP_INDEX - MSG_PAYLOAD_START_INDEX + 1));
+
+	m_cmd[MSG_CRC_BYTE_INDEX] 	  = (uint8_t)(checksum  >> 8);
+	m_cmd[MSG_CRC_BYTE_INDEX + 1] = (uint8_t)(checksum  & 0xFF);
+
+
+
+	std::cout << "uint16_ t CRC_CHECKSUM = : " << checksum << std::endl;
+	printf("bytes CRC_CHECKSUM:  %d %d\n\r", m_cmd[MSG_CRC_BYTE_INDEX], m_cmd[MSG_CRC_BYTE_INDEX+1]);
 
 	/* Error Handling */
-	if (n < 0)
+	if (serial_write(&m_cmd[0], MAX_MSG_SIZE) < 0)
 	{
 	    std::cout << "Error writing: " 
 	              << strerror(errno) 
 	              << std::endl;
 	}
 
+	if (serial_read() < 0)
+	{
+	    std::cout << "Error reading: " 
+	              << strerror(errno) 
+	              << std::endl;
+	}
+	else
+	{
+		std::cout << "Received over UART: " << m_read_buffer << std::endl;
+		clear_read_buffer();
+	}
 
+}
 
+uint16_t SerialCom::crc_checksum(char *input, uint8_t num)
+{
+	return crc_16((const unsigned char*)input, (unsigned long)num);
+}
+
+void SerialCom::clear_read_buffer()
+{
+	int i;
+	for(i = 0; i<sizeof(m_read_buffer); i++)
+	{
+		m_read_buffer[i] = 0;
+	}
 }
 
 SerialCom::~SerialCom()
