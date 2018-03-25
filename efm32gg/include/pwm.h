@@ -8,8 +8,8 @@
 
 enum pwm_states
 {
-	THRUSTER_PWM_UPDATE_FAIL,
-	THRUSTER_PWM_UPDATE_OK,
+	PWM_UPDATE_FAIL,
+	PWM_UPDATE_OK,
 };
 
 #define TIMER_ROUTE_CCPEN(ch) (0x1UL << ch)
@@ -74,6 +74,7 @@ void initTimer(TIMER_TypeDef *timer,
 				int num_channels);
 uint32_t us_to_comparevalue(uint32_t us);
 uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr);
+uint8_t update_led_pwm(uint8_t *pwm_data_ptr);
 
 void TIMER0_IRQHandler(void);
 void TIMER1_IRQHandler(void);

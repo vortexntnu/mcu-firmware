@@ -10,6 +10,8 @@
 #define VORTEX_MSG_MAX_SIZE 21
 #define VORTEX_MSG_TYPE_INDEX 2
 #define VORTEX_MSG_START_DATA_INDEX 3
+#define VORTEX_MSG_CRC_BYTE_INDEX 19
+
 
 typedef enum msg_state
 {
@@ -24,11 +26,11 @@ typedef enum msg_state
 typedef enum msg_type
 {
 	MSG_TYPE_NOTYPE,
-	MSG_TYPE_ACK,
-	MSG_TYPE_NOACK,
 	MSG_TYPE_THRUSTER = 0x41,
 	MSG_TYPE_LED = 0x42,
 	MSG_TYPE_HEARTBEAT = 0x43,
+	MSG_TYPE_ACK = 0x44,
+	MSG_TYPE_NOACK = 0x45,
 }msg_type;
 
 
