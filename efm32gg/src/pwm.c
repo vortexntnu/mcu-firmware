@@ -38,10 +38,7 @@ uint32_t us_to_comparevalue(uint32_t us)
 uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 {
 	int i;
-	uint16_t pwm_data[NUM_THRUSTERS] = {0};
-
-	//TODO: convert the 16 bytes in pwm_data_ptr to 8 uint16_t
-	//cmd1 = (uint16_t)((cmd[0] << 8) & 0xFF00) | (uint16_t)(cmd[1] & 0x00FF);
+	uint16_t pwm_data[NUM_THRUSTERS] = {1500};
 
 	for (i = 0; i < NUM_THRUSTERS; i++)
 	{
@@ -60,7 +57,12 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 		TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
 	}
 
-	return THRUSTER_PWM_UPDATE_OK;
+	return PWM_UPDATE_OK;
+}
+
+uint8_t update_led_pwm(uint8_t *pwm_data_ptr)
+{
+	return PWM_UPDATE_OK;
 }
 
 void initPwm(void)
@@ -116,7 +118,7 @@ void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us,
 	// Start HFXO and wait until it is stable
 	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
 
-	 // Select HFXO as clock source for HFCLK
+	 // Select HFXO as clock source for HFPER
 	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFXO);
 
 	TIMER_InitCC_TypeDef timerCCInit =
