@@ -20,7 +20,7 @@ struct vortex_msg
 	uint8_t 	crc_byte1;         			// crc byte
 	uint8_t 	crc_byte2;					// crc byte
 	uint8_t		magic_stop;					// stop transmission byte
-}message = { 0, 0, {0}, 0, 0, 0 };
+}vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
 
 void USART1_RX_IRQHandler(void)
 {
@@ -136,7 +136,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 {
 	if (magic_bytes_received() == MSG_STATE_MAGIC_BYTES_NOT_RECEIVED)
 	{
-		return MSG_STATE_MAGIC_BYTES_NOT_RECEIVED;
+		return MSG_STATE_RECEIVE_FAIL;
 	}
 
 	int i;
@@ -180,17 +180,36 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	receiveBuff.received_start_byte = false;
 	receiveBuff.received_stop_byte = false;
 
-
 	return MSG_STATE_RECEIVE_OK;
 }
 
-uint8_t send_vortex_msg(msg_flag type)
+void send_vortex_msg(msg_type type)
 {
 	switch(type)
 	{
+		case MSG_TYPE_NOACK:
+			vortex_message.type = MSG_TYPE_NOACK;
+			strcpy(&vortex_message.payload[0], "NO ACK\n");
+			break;
+		case MSG_TYPE_ACK:
+			vortex_message.type = MSG_TYPE_ACK;
+			strcpy(&vortex_message.payload[0], "ACK!\n");
+			break;
 		default:
-			return MSG_STATE_SEND_FAIL;
+			vortex_message.type = MSG_TYPE_NOTYPE;
+			break;
 	}
+
+	USART_Tx(UART, vortex_message.magic_start);
+	USART_Tx(UART, vortex_message.type);
+
+	int i;
+	for (i = 0; i < MAX_PAYLOAD_SIZE; i++)
+	{
+		USART_Tx(UART, vortex_message.payload[i]);
+	}
+
+	USART_Tx(UART, vortex_message.magic_stop);
 
 }
 
