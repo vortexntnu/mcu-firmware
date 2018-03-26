@@ -189,11 +189,11 @@ void send_vortex_msg(msg_type type)
 	{
 		case MSG_TYPE_NOACK:
 			vortex_message.type = MSG_TYPE_NOACK;
-			strcpy(&vortex_message.payload[0], "NO ACK\n");
+			strcpy(&vortex_message.payload[0], "NO ACK");
 			break;
 		case MSG_TYPE_ACK:
 			vortex_message.type = MSG_TYPE_ACK;
-			strcpy(&vortex_message.payload[0], "ACK!\n");
+			strcpy(&vortex_message.payload[0], "ACK!");
 			break;
 		default:
 			vortex_message.type = MSG_TYPE_NOTYPE;
@@ -202,15 +202,21 @@ void send_vortex_msg(msg_type type)
 
 	USART_Tx(UART, vortex_message.magic_start);
 	USART_Tx(UART, vortex_message.type);
-
-	int i;
-	for (i = 0; i < MAX_PAYLOAD_SIZE; i++)
-	{
-		USART_Tx(UART, vortex_message.payload[i]);
-	}
-
+	USART_PutData(&vortex_message.payload[0], (uint8_t)strlen(vortex_message.payload));
 	USART_Tx(UART, vortex_message.magic_stop);
+	USART_PutData("\n\r", 2);
 
+}
+
+void USART_PutData(uint8_t *data_ptr, uint8_t size)
+{
+	int i;
+
+	for (i = 0; i < size; i++)
+	{
+		USART_Tx(UART, *data_ptr);
+		data_ptr++;
+	}
 }
 
 
