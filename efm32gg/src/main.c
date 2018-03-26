@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "em_rmu.h"
+#include "em_letimer.h"
 #include "efm32gg990f1024.h"
 
 #include "uart.h"
@@ -9,10 +10,17 @@
 #include "crc.h"
 #include "watchdog.h"
 
+#define LETIMER_MS 2000 // how often LETIMER0_IRQHandler triggers in milliseconds
+
+bool start_sequence_finished = false;
+bool is_start_sequence_finished();
+
 bool crc_passed(uint8_t * receive_data);
+void start_sequence(void);
+void initleTimer(void);
 
-int main() {
-
+int main()
+{
 	CHIP_Init();
 	initUart();
 	initPwm();
@@ -21,31 +29,29 @@ int main() {
 	unsigned long resetCause = RMU_ResetCauseGet();
 	RMU_ResetCauseClear();
 
-	char startup_msg[50];
+	char startup_msg[50] = {0};
+	char* startup_msg_ptr = &startup_msg[0];
 
 	if (resetCause & RMU_RSTCAUSE_WDOGRST)
 	{
-		strcpy(&startup_msg[0], "$ MCU reset by watchdog, starting... @\n\r");
+		strcpy(startup_msg_ptr, "MCU reset by watchdog, start initialization...\n\r");
 	}
 	else
 	{
-		strcpy(&startup_msg[0], "$ MCU starting... @\n\r");
+		strcpy(startup_msg_ptr, "$ MCU reset normally, start initialization... @\n\r");
 	}
 
-	uint32_t i;
-
-	for (i = 0; i < strlen(startup_msg); i++)
-	{
-		USART_Tx(UART, startup_msg[i]);
-	}
+	USART_PutData((uint8_t*)startup_msg_ptr, strlen(startup_msg));
 
 	uint8_t receive_data[VORTEX_MSG_MAX_SIZE] = {0};
 	uint8_t *receive_data_ptr = &receive_data[0];
-
 	uint8_t msg_type = MSG_TYPE_NOTYPE;
 
-	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
-	GPIO_PinOutSet(gpioPortE, 3);
+	start_sequence();
+
+
+	strcpy(&startup_msg[0], "$ MCU initialization finished... @\n\r");
+	USART_PutData((uint8_t*)startup_msg_ptr, strlen(startup_msg));
 
 	while (1)
 	{
@@ -123,3 +129,74 @@ bool crc_passed(uint8_t * receive_data)
 		return false;
 	}
 }
+
+void start_sequence(void)
+{
+	initleTimer();
+
+	// startup sequence for leds, thrusters are already being initialized
+
+	GPIO_PinModeSet(gpioPortE, 3, gpioModePushPull, 0);
+	GPIO_PinOutSet(gpioPortE, 3);
+
+	while (!is_start_sequence_finished())
+	{
+		// wait for LETIMER_MS milliseconds
+		WDOGn_Feed(WDOG);
+	}
+}
+
+bool is_start_sequence_finished()
+{
+	return start_sequence_finished;
+}
+
+
+void LETIMER0_IRQHandler(void)
+{
+	// Clear LETIMER0 underflow interrupt flag
+	start_sequence_finished = true;
+	LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
+	LETIMER0->CNT = LETIMER_MS;
+	NVIC_DisableIRQ(LETIMER0_IRQn);
+}
+
+
+void initleTimer(void)
+{
+	const LETIMER_Init_TypeDef letimerInit =
+	{
+	  .enable         = false,             // Start counting when init completed */
+	  .debugRun       = true,            // Counter shall not keep running during debug halt */
+	  .comp0Top       = true,             // Load COMP0 register into CNT when counter underflows. COMP0 is used as TOP */
+	  .bufTop         = false,            // Don't load COMP1 into COMP0 when REP0 reaches 0 */
+	  .out0Pol        = 0,                // Idle value for output 0 */
+	  .out1Pol        = 0,                // Idle value for output 1 */
+	  .ufoa0          = letimerUFOAToggle,// Toggle output on output 0 */
+	  .ufoa1          = letimerUFOAToggle,// Toggle output on output 1 */
+	  .repMode        = letimerRepeatFree // Count until stopped */
+	};
+
+	CMU_ClockEnable(cmuClock_CORELE, true);
+
+	CMU_OscillatorEnable(cmuOsc_ULFRCO, true, true);
+
+	// The clock source of LETIMER0
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_ULFRCO);
+
+	CMU_ClockEnable(cmuClock_LETIMER0, true);
+
+	// Time out value configuration
+	LETIMER_CompareSet(LETIMER0, 0, LETIMER_MS);
+
+	// Initializing LETIMER0
+	LETIMER_Init(LETIMER0, &letimerInit);
+	LETIMER_Enable(LETIMER0, true);
+
+	LETIMER_IntClear(LETIMER0, _LETIMER_IF_MASK);
+	LETIMER_IntEnable(LETIMER0, LETIMER_IF_UF);
+	NVIC_ClearPendingIRQ(LETIMER0_IRQn);
+	NVIC_EnableIRQ(LETIMER0_IRQn);
+
+}
+
