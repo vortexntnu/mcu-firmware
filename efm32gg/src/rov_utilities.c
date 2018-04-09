@@ -1,5 +1,15 @@
 #include "rov_utilities.h"
 
+struct vortex_msg
+{
+	uint8_t 	magic_start;				// start transmission byte
+	uint8_t 	type;						// message type
+	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
+	uint8_t 	crc_byte1;         			// crc byte
+	uint8_t 	crc_byte2;					// crc byte
+	uint8_t		magic_stop;					// stop transmission byte
+} vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
+
 bool start_sequence_finished = false;
 uint16_t start_sequence_passed_ms = 0;
 
@@ -63,7 +73,9 @@ void start_sequence(void)
 	NVIC_DisableIRQ(USART1_RX_IRQn);
 
 	uint8_t pwm_signals[NUM_THRUSTERS * 2] = {0};
-	// startup sequence for leds, thrusters are already being initialized
+
+	char uart_msg[50] = {0};
+	char* uart_msg_ptr = &uart_msg[0];
 
 	start_sequence_finished = false;
 	disarm_sequence_finished = false;
@@ -78,6 +90,9 @@ void start_sequence(void)
 	GPIO_PinOutSet(LED1_PORT, LED1_PIN);
 	GPIO_PinOutSet(LED2_PORT, LED2_PIN);
 
+	strcpy(uart_msg_ptr, "MCU initialization finished...\n\r");
+	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+
 	NVIC_EnableIRQ(USART1_RX_IRQn);
 
 }
@@ -89,13 +104,22 @@ void disarm_sequence(void)
 	NVIC_DisableIRQ(USART1_RX_IRQn);
 	NVIC_EnableIRQ(LETIMER0_IRQn);
 
+	char uart_msg[50] = {0};
+	char* uart_msg_ptr = &uart_msg[0];
+
 	uint8_t pwm_signals[NUM_THRUSTERS * 2] = {0};
+
+	strcpy(uart_msg_ptr, "DISARMING start\n\r");
+	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	while (disarm_sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
+
+	strcpy(uart_msg_ptr, "DISARMING finished\n\r");
+	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	arm_sequence_finished = false;
 
@@ -108,6 +132,12 @@ void arm_sequence(void)
 {
 	NVIC_DisableIRQ(USART1_RX_IRQn);
 	NVIC_EnableIRQ(LETIMER0_IRQn);
+
+	char uart_msg[50] = {0};
+	char* uart_msg_ptr = &uart_msg[0];
+
+	strcpy(uart_msg_ptr, "ARMING start\n\r");
+	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	uint8_t pwm_signals[NUM_THRUSTERS * 2];
 
@@ -123,6 +153,9 @@ void arm_sequence(void)
 		update_thruster_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
+
+	strcpy(uart_msg_ptr, "ARMING finished\n\r");
+	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	disarm_sequence_finished = false;
 
@@ -193,6 +226,31 @@ bool crc_passed(uint8_t * receive_data)
 	{
 		return false;
 	}
+}
+
+void send_vortex_msg(msg_type type)
+{
+	switch(type)
+	{
+		case MSG_TYPE_NOACK:
+			vortex_message.type = MSG_TYPE_NOACK;
+			strcpy((char*)&vortex_message.payload[0], "NO ACK");
+			break;
+		case MSG_TYPE_ACK:
+			vortex_message.type = MSG_TYPE_ACK;
+			strcpy((char*)&vortex_message.payload, "ACK!");
+			break;
+		default:
+			vortex_message.type = MSG_TYPE_NOTYPE;
+			break;
+	}
+
+	USART_Tx(UART, vortex_message.magic_start);
+	USART_Tx(UART, vortex_message.type);
+	USART_PutData((uint8_t*) &vortex_message.payload, (uint8_t)strlen((char*)vortex_message.payload));
+	USART_Tx(UART, vortex_message.magic_stop);
+	USART_PutData((uint8_t*)"\n\r", 2);
+
 }
 
 

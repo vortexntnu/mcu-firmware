@@ -10,6 +10,7 @@
 
 #include "pwm.h"
 #include "crc.h"
+#include "uart.h"
 #include "watchdog.h"
 
 #define MAGIC_START_BYTE 	0x24
@@ -30,6 +31,7 @@
 #define LED1_PIN  	12
 #define LED2_PORT 	gpioPortE
 #define LED2_PIN  	13
+
 #define LED_PWM_FREQ 					500
 #define LED_START_PULSE_WIDTH_US 		1500
 
@@ -59,7 +61,7 @@ typedef enum msg_type
 	MSG_TYPE_ACK 		= 0x44,
 	MSG_TYPE_NOACK 		= 0x45,
 	MSG_TYPE_ARM 		= 0x46,
-	MSG_TYPE_DISARM 	= 0x47
+	MSG_TYPE_DISARM 	= 0x47,
 }msg_type;
 
 
@@ -67,6 +69,7 @@ void start_sequence(void);
 void arm_sequence(void);
 void disarm_sequence(void);
 void initLeTimer(void);
+void send_vortex_msg(msg_type type);
 
 uint32_t us_to_comparevalue(uint32_t us);
 uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr);
