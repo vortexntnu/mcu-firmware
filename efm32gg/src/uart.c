@@ -61,11 +61,11 @@ void initUart(void)
 
 	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
 
-	// Start HFXO and wait until it is stable
-	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+	// Start  HFRCO and wait until it is stable
+	CMU_OscillatorEnable(cmuOsc_HFRCO, true, true);
 
-	 // Select HFXO as clock source for HFCLK
-	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+	// Select HFRCO as clock source for HFCLK
+	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
 
 	// Enable clock for USART module
 	CMU_ClockEnable(cmuClock_USART1, true);
@@ -143,7 +143,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 		return MSG_STATE_RECEIVE_FAIL;
 	}
 
-	if(start_index > stop_index)
+	if (start_index > stop_index)
 	{
 		*receive_data_ptr = (stop_index + BUFFERSIZE + 1) - start_index;
 		receive_data_ptr++;
