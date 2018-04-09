@@ -66,21 +66,22 @@ SerialCom::SerialCom()
 	m_thruster_cmd[MSG_TYPE_INDEX] = MSG_TYPE_THRUSTER;
 
 	m_heartbeat_cmd[MAGIC_START_BYTE_INDEX] = MAGIC_START_BYTE;
-	m_heartbeat_cmd[MAGIC_STOP_BYTE_INDEX] = MAGIC_STOP_BYTE;
 	m_heartbeat_cmd[MSG_TYPE_INDEX] = MSG_TYPE_HEARTBEAT;
-
-
+	m_heartbeat_cmd[MSG_HEARTBEAT_SIZE-1] = MAGIC_STOP_BYTE;
 }
+
 
 int SerialCom::serial_write(char* cmd, int cmd_size)
 {
 	return write(m_dev, cmd, cmd_size);
 }
 
+
 int SerialCom::serial_read()
 {
 	return read(m_dev, &m_read_buffer, sizeof(m_read_buffer));
 }
+
 
 void SerialCom::thruster_pwm_callback(const vortex_msgs::Pwm& msg)
 {
@@ -140,6 +141,7 @@ void SerialCom::heartbeat_callback(const std_msgs::String::ConstPtr& msg)
 {
 
 	ROS_INFO("I heard: [%s]", msg->data.c_str());
+
 	// Error Handling 
 	if (serial_write(&m_heartbeat_cmd[0], MSG_HEARTBEAT_SIZE) < 0)
 	{

@@ -28,6 +28,7 @@ extern "C" {
 
 #define MAX_PAYLOAD_SIZE 16
 #define MAX_MSG_SIZE 21
+
 #define MSG_HEARTBEAT_SIZE 3
 
 #define MAGIC_START_BYTE_INDEX  0
