@@ -1,6 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
+#include "rov_utilities.h"
+
 #include <string.h>
 #include "em_chip.h"
 #include "em_cmu.h"
@@ -8,8 +10,6 @@
 #include "em_usart.h"
 #include "efm32gg_uart.h"
 #include "efm32gg942f1024.h"
-
-#include "rov_utilities.h"
 
 #define BUFFERSIZE 256
 
@@ -22,7 +22,6 @@ extern struct circularBuffer receiveBuff;
 #define UART_RX_PIN 6
 
 void initUart(void);
-void send_vortex_msg(msg_type type);
 void USART_PutData(uint8_t * data_ptr, uint8_t size);
 uint8_t magic_bytes_received(void);
 uint8_t receive_vortex_msg(uint8_t *receive_data_ptr);
