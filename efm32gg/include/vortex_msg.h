@@ -26,11 +26,13 @@ typedef enum msg_state
 typedef enum msg_type
 {
 	MSG_TYPE_NOTYPE,
-	MSG_TYPE_THRUSTER = 0x41,
-	MSG_TYPE_LED = 0x42,
-	MSG_TYPE_HEARTBEAT = 0x43,
-	MSG_TYPE_ACK = 0x44,
-	MSG_TYPE_NOACK = 0x45,
+	MSG_TYPE_THRUSTER 	= 0x41,
+	MSG_TYPE_LED 		= 0x42,
+	MSG_TYPE_HEARTBEAT 	= 0x43,
+	MSG_TYPE_ACK 		= 0x44,
+	MSG_TYPE_NOACK 		= 0x45,
+	MSG_TYPE_ARM 		= 0x46,
+	MSG_TYPE_DISARM 	= 0x47
 }msg_type;
 
 
