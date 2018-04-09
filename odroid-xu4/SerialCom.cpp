@@ -7,12 +7,16 @@ SerialCom::SerialCom()
 
 	m_dev = open(device, O_RDWR| O_NONBLOCK);
 
-	if (m_dev < 0)
+	while (m_dev < 0)
 	{
-		std::cout << "Error "
-			 << errno << " opening " 
-			 << device << ": " 
-			 << strerror (errno) << std::endl;
+		
+		ROS_INFO("Error %d opening %s: %s. Could not connect to MCU, retrying...", 
+				 errno, device, strerror(errno));
+
+		usleep(2000*1000); 
+
+		m_dev = open(device, O_RDWR| O_NONBLOCK);
+		
 	}
 
 	// Configure port
@@ -54,12 +58,17 @@ SerialCom::SerialCom()
 				  << std::endl;
 	}
 
-	// Allocate memory for read and right buffer
+	// Allocate memory for read and write buffer
 	memset(&m_read_buffer, '\0', sizeof(m_read_buffer));
 
-	m_cmd[MAGIC_START_BYTE_INDEX] = '$';
-	m_cmd[MAGIC_STOP_BYTE_INDEX] = '@';
-	m_cmd[MSG_TYPE_INDEX] = 'A';
+	m_thruster_cmd[MAGIC_START_BYTE_INDEX] = (char)MAGIC_START_BYTE;
+	m_thruster_cmd[MAGIC_STOP_BYTE_INDEX] = (char)MAGIC_STOP_BYTE;
+	m_thruster_cmd[MSG_TYPE_INDEX] = MSG_TYPE_THRUSTER;
+
+	m_heartbeat_cmd[MAGIC_START_BYTE_INDEX] = MAGIC_START_BYTE;
+	m_heartbeat_cmd[MAGIC_STOP_BYTE_INDEX] = MAGIC_STOP_BYTE;
+	m_heartbeat_cmd[MSG_TYPE_INDEX] = MSG_TYPE_HEARTBEAT;
+
 
 }
 
@@ -70,54 +79,42 @@ int SerialCom::serial_write(char* cmd, int cmd_size)
 
 int SerialCom::serial_read()
 {
-	
 	return read(m_dev, &m_read_buffer, sizeof(m_read_buffer));
 }
 
-void SerialCom::callback(const vortex_msgs::Pwm& msg)
+void SerialCom::thruster_pwm_callback(const vortex_msgs::Pwm& msg)
 {
-	//ROS_INFO("I heard: ");
-	//ROS_INFO("%d ", msg.positive_width_us[0]);
-
-	std::cout << "I heard: " 
-	  		  << msg.positive_width_us[0] 
-	  		  << std::endl;
+	ROS_INFO("I heard: ");
+	ROS_INFO("%d ", msg.positive_width_us[0]);
 
 	std::cout << "Command: "
-			  << m_cmd[MAGIC_START_BYTE_INDEX] 
-		 	  << m_cmd[MSG_TYPE_INDEX];
+			  << m_thruster_cmd[MAGIC_START_BYTE_INDEX] 
+		 	  << m_thruster_cmd[MSG_TYPE_INDEX];
 
-	uint8_t char1, char2;
-	char1 = (uint8_t)(msg.positive_width_us[0]  >> 8);    // get the high 8 bits
-	char2 = (uint8_t)(msg.positive_width_us[0]  & 0xFF);  // isolate the low 8 bits
 
-    int i;
-	for (i = MSG_PAYLOAD_START_INDEX; 
-		 i <= MSG_PAYLOAD_STOP_INDEX; 
-		 i++)
+	for (int i = MSG_PAYLOAD_START_INDEX; i < MSG_PAYLOAD_START_INDEX+8; i++)
 	{
-		if ((i % 2) == 0)
-			m_cmd[i] = char1;
-		else
-			m_cmd[i] = char2;
-
-		printf(" %d ", m_cmd[i]);
+		m_thruster_cmd[i*2] = (uint8_t)(msg.positive_width_us[i]  >> 8);
+		m_thruster_cmd[i*2+1] = (uint8_t)(msg.positive_width_us[i]  & 0xFF);
+		printf(" %d ", m_thruster_cmd[i*2]);
+		printf(" %d ", m_thruster_cmd[i*2 + 1]);
 	}
 
-	std::cout << m_cmd[MAGIC_STOP_BYTE_INDEX] << std::endl;
+	std::cout << m_thruster_cmd[MAGIC_STOP_BYTE_INDEX] << std::endl;
 
-	uint16_t checksum = crc_checksum(&m_cmd[MSG_PAYLOAD_START_INDEX], (MSG_PAYLOAD_STOP_INDEX - MSG_PAYLOAD_START_INDEX + 1));
+	uint16_t checksum = crc_checksum(&m_thruster_cmd[MSG_PAYLOAD_START_INDEX], 
+									(MSG_PAYLOAD_STOP_INDEX - MSG_PAYLOAD_START_INDEX + 1));
 
-	m_cmd[MSG_CRC_BYTE_INDEX] 	  = (uint8_t)(checksum  >> 8);
-	m_cmd[MSG_CRC_BYTE_INDEX + 1] = (uint8_t)(checksum  & 0xFF);
-
-
+	m_thruster_cmd[MSG_CRC_BYTE_INDEX] 	  = (uint8_t)(checksum  >> 8);
+	m_thruster_cmd[MSG_CRC_BYTE_INDEX + 1] = (uint8_t)(checksum  & 0xFF);
 
 	std::cout << "uint16_ t CRC_CHECKSUM = : " << checksum << std::endl;
-	printf("bytes CRC_CHECKSUM:  %d %d\n\r", m_cmd[MSG_CRC_BYTE_INDEX], m_cmd[MSG_CRC_BYTE_INDEX+1]);
+	printf("bytes CRC_CHECKSUM:  %d %d\n\r", 
+			m_thruster_cmd[MSG_CRC_BYTE_INDEX], 
+			m_thruster_cmd[MSG_CRC_BYTE_INDEX+1]);
 
-	/* Error Handling */
-	if (serial_write(&m_cmd[0], MAX_MSG_SIZE) < 0)
+	// Error Handling 
+	if (serial_write(&m_thruster_cmd[0], MAX_MSG_SIZE) < 0)
 	{
 	    std::cout << "Error writing: " 
 	              << strerror(errno) 
@@ -138,6 +135,20 @@ void SerialCom::callback(const vortex_msgs::Pwm& msg)
 
 }
 
+
+void SerialCom::heartbeat_callback(const std_msgs::String::ConstPtr& msg)
+{
+
+	ROS_INFO("I heard: [%s]", msg->data.c_str());
+	// Error Handling 
+	if (serial_write(&m_heartbeat_cmd[0], MSG_HEARTBEAT_SIZE) < 0)
+	{
+	    std::cout << "Error writing: " 
+	              << strerror(errno) 
+	              << std::endl;
+	}
+}
+
 uint16_t SerialCom::crc_checksum(char *input, uint8_t num)
 {
 	return crc_16((const unsigned char*)input, (unsigned long)num);
@@ -145,8 +156,7 @@ uint16_t SerialCom::crc_checksum(char *input, uint8_t num)
 
 void SerialCom::clear_read_buffer()
 {
-	int i;
-	for(i = 0; i<sizeof(m_read_buffer); i++)
+	for (int i = 0; i < sizeof(m_read_buffer); i++)
 	{
 		m_read_buffer[i] = 0;
 	}
