@@ -168,7 +168,7 @@ void LETIMER0_IRQHandler(void)
 {
 	if (start_sequence_finished == false)
 	{
-		start_sequence_passed_ms+=500;
+		start_sequence_passed_ms += LETIMER_MS;
 	}
 
 	if (start_sequence_passed_ms >= START_SEQUENCE_DURATION_MS)
@@ -179,7 +179,7 @@ void LETIMER0_IRQHandler(void)
 
 	if (arm_sequence_finished == false)
 	{
-		arm_sequence_passed_ms += 500;
+		arm_sequence_passed_ms += LETIMER_MS;
 	}
 
 	if (arm_sequence_passed_ms >= ARM_SEQUENCE_DURATION_MS)
@@ -191,7 +191,7 @@ void LETIMER0_IRQHandler(void)
 
 	if (disarm_sequence_finished == false)
 	{
-		disarm_sequence_passed_ms += 500;
+		disarm_sequence_passed_ms += LETIMER_MS;
 	}
 
 	if (disarm_sequence_passed_ms >= DISARM_SEQUENCE_DURATION_MS)
@@ -200,7 +200,6 @@ void LETIMER0_IRQHandler(void)
 		NVIC_DisableIRQ(LETIMER0_IRQn);
 
 	}
-
 
 	LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
 	LETIMER0->CNT = LETIMER_MS;
@@ -269,7 +268,7 @@ void initLeTimer(void)
 	  .repMode        = letimerRepeatFree 	// Count until stopped
 	};
 
-	CMU_ClockEnable(cmuClock_CORELE, true);
+	CMU_ClockEnable(cmuClock_HFLE, true);
 
 	CMU_OscillatorEnable(cmuOsc_ULFRCO, true, true);
 
