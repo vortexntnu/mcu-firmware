@@ -3,7 +3,6 @@
 
 #include "em_chip.h"
 #include "em_cmu.h"
-#include "em_letimer.h"
 #include "em_wdog.h"
 
 void initWdog(void);
