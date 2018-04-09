@@ -25,29 +25,25 @@ int main()
 	unsigned long resetCause = RMU_ResetCauseGet();
 	RMU_ResetCauseClear();
 
-	char startup_msg[50] = {0};
-	char* startup_msg_ptr = &startup_msg[0];
+	char uart_msg[50] = {0};
+	char* uart_msg_ptr = &uart_msg[0];
 
 	if (resetCause & RMU_RSTCAUSE_WDOGRST)
 	{
-		strcpy(startup_msg_ptr, "Please pet the watchdog, start initialization...\n\r");
+		strcpy(uart_msg_ptr, "Please pet the watchdog, start initialization...\n\r");
 	}
 	else
 	{
-		strcpy(startup_msg_ptr, "MCU reset normally, start initialization...\n\r");
+		strcpy(uart_msg_ptr, "MCU reset normally, start initialization...\n\r");
 	}
 
-
-	USART_PutData((uint8_t*)startup_msg_ptr, strlen(startup_msg));
+	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	uint8_t receive_data[VORTEX_MSG_MAX_SIZE] = {0};
 	uint8_t *receive_data_ptr = &receive_data[0];
 	uint8_t msg_type = MSG_TYPE_NOTYPE;
 
 	start_sequence();
-
-	strcpy(&startup_msg[0], "MCU initialization finished...\n\r");
-	USART_PutData((uint8_t*)startup_msg_ptr, strlen(startup_msg));
 
 	while (1)
 	{
@@ -61,8 +57,25 @@ int main()
 				}
 				else
 				{
-					send_vortex_msg(MSG_TYPE_NOACK);
-					msg_type = MSG_TYPE_NOACK;
+					switch (receive_data[VORTEX_MSG_TYPE_INDEX])
+					{
+						case MSG_TYPE_HEARTBEAT:
+							msg_type = MSG_TYPE_HEARTBEAT;
+							break;
+
+						case MSG_TYPE_ARM:
+							msg_type = MSG_TYPE_ARM;
+							break;
+
+						case MSG_TYPE_DISARM:
+							msg_type = MSG_TYPE_DISARM;
+							break;
+
+						default:
+							msg_type = MSG_TYPE_NOACK;
+							send_vortex_msg(MSG_TYPE_NOACK);
+							break;
+					}
 				}
 				break;
 
@@ -104,6 +117,8 @@ int main()
 				break;
 
 			case MSG_TYPE_HEARTBEAT:
+				strcpy(uart_msg_ptr, "HEARTBEAT RECEIVED, PETTING WATCHDOG\n\r");
+				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 				WDOGn_Feed(WDOG);
 				break;
 
