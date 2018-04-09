@@ -31,6 +31,9 @@ int main()
 
 	char startup_msg[50] = {0};
 	char* startup_msg_ptr = &startup_msg[0];
+	char heartbeat_msg[50] = {0};
+	char* heartbeat_msg_ptr = &heartbeat_msg[0];
+	strcpy(heartbeat_msg_ptr, "HEARTBEAT RECEIVED, PETTING WATCHDOG\n\r");
 
 	if (resetCause & RMU_RSTCAUSE_WDOGRST)
 	{
@@ -50,7 +53,7 @@ int main()
 	start_sequence();
 
 
-	strcpy(&startup_msg[0], "$ MCU initialization finished... @\n\r");
+	strcpy(&startup_msg[0], "MCU initialization finished... @\n\r");
 	USART_PutData((uint8_t*)startup_msg_ptr, strlen(startup_msg));
 
 	while (1)
@@ -65,8 +68,25 @@ int main()
 				}
 				else
 				{
-					send_vortex_msg(MSG_TYPE_NOACK);
-					msg_type = MSG_TYPE_NOACK;
+					switch(receive_data[VORTEX_MSG_TYPE_INDEX])
+					{
+						case MSG_TYPE_HEARTBEAT:
+							msg_type = MSG_TYPE_HEARTBEAT;
+							break;
+
+						/*
+						case MSG_TYPE_ARM:
+							break;
+
+						case MSG_TYPE_DISARM:
+							break;
+						*/
+
+						default:
+							msg_type = MSG_TYPE_NOACK;
+							send_vortex_msg(MSG_TYPE_NOACK);
+							break;
+					}
 				}
 
 				WDOGn_Feed(WDOG);
@@ -102,6 +122,7 @@ int main()
 				break;
 
 			case MSG_TYPE_HEARTBEAT:
+				USART_PutData((uint8_t*)heartbeat_msg_ptr, strlen(heartbeat_msg));
 				WDOGn_Feed(WDOG);
 				break;
 
@@ -200,4 +221,3 @@ void initleTimer(void)
 	NVIC_EnableIRQ(LETIMER0_IRQn);
 
 }
-
