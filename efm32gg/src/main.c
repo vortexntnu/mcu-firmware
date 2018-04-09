@@ -111,6 +111,7 @@ int main()
 	}
 }
 
+
 bool crc_passed(uint8_t * receive_data)
 {
 	uint16_t crc_checksum_calc = 0;
