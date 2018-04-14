@@ -3,6 +3,8 @@ sudo: required
 services:
   - docker
 
+language: c
+
 before_install:
   - docker pull vortexntnu/mcu-fw-build:latest
 
