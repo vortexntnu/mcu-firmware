@@ -5,11 +5,18 @@ services:
 
 language: c
 
+addons:
+  ssh_known_hosts: odroid.vortexntnu.no
 before_install:
   - docker pull vortexntnu/mcu-fw-build:latest
 
 script: "./build.sh"
 
+- openssl aes-256-cbc -K $encrypted_4483e7393768_key -iv $encrypted_4483e7393768_iv
+  -in travis_odroid_rsa.enc -out /tmp/travis_odroid_rsa -d
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/travis_odroid_rsa
+- ssh-add /tmp/travis_odroid_rsa
 notifications:
   slack:
     secure: Hx7upH+eC6ROnq0FNsIEhMWUd4IV7I3glaYrVdnovDxjwOlEfvxSuRddqTmPCy13yzfjzklMG8hyZFQuJsywrZ8JvJPN6aP1aMqrupP4Bei58TkoLUH/kI+BfsDLvop3WOeBqYx/mHw6BItE+dWRr6XjXEHsneqKzdQf6LphSBXfgafX7pyVjtI5jd2oeDCHEEeattZRGLCF+2ef1bFmRdVJirDHPai0dCfTttaIkkOGX1lhIcmKxtwODqATpjVyEu9SmLdvBuy83JHxWlg6yHYPoenbk8+dFYao9IztCSh0KXrzWk9v/GswrKQcUFsNi+3VRkU4vrR/3SnMVYC/eSXzSmhE9qmddUWOR7DRyJF4glgAZoJvPuJzNc5gYH5ZWRDTJ93Nqh7BS5oo+2V/Gdy6aR0Azkjsp0/uR0igpwrreMee051W+gJjr5vhyswaVskwl3gb6jVvXrioA/Go7dxHKPL9D8G322EbAjg6Jumw4DqxkS9J6Vrh6FGRgxcsBFEAi8DWaBag+GDsv/+depBEPQFIXwlCwUtesuIUiwgPVwn5b6OL+Sbl/gBX21yJTVSVieQbP7awG+nkwJcffcHet1a1b1bgfH6txIlDilICSf/pfu5xZ+DU5OO8mNiHB/QkTTvtNKqnYtOw85kHt0XYK57NvJZzwWD2PpJ6ODk=
