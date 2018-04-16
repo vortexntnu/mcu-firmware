@@ -1,26 +1,16 @@
 #include "uart.h"
-#include "efm32gg990f1024.h"
 
 struct circularBuffer
 {
-  uint8_t 	data[BUFFERSIZE];		// data buffer
-  uint8_t 	readIndex;         		// read index
-  uint8_t 	writeIndex;        		// write index
-  uint8_t  	start_byte_index;		// start byte index
-  uint8_t  	stop_byte_index;		// stop byte index
-  bool		received_start_byte;	// MAGIC_START_BYTE is received
-  bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
+	volatile uint8_t 	data[BUFFERSIZE];		// data buffer
+	volatile uint8_t 	readIndex;				// read index
+	volatile uint8_t 	writeIndex;				// write index
+	volatile uint8_t  	start_byte_index;		// start byte index
+	volatile uint8_t  	stop_byte_index;		// stop byte index
+	volatile bool		received_start_byte;	// MAGIC_START_BYTE is received
+	volatile bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
 } receiveBuff, transmitBuff = { {0}, 0, 0, -1, -1, false, false };
 
-struct vortex_msg
-{
-	uint8_t 	magic_start;				// start transmission byte
-	uint8_t 	type;						// message type
-	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
-	uint8_t 	crc_byte1;         			// crc byte
-	uint8_t 	crc_byte2;					// crc byte
-	uint8_t		magic_stop;					// stop transmission byte
-}vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
 
 void USART1_RX_IRQHandler(void)
 {
@@ -29,7 +19,7 @@ void USART1_RX_IRQHandler(void)
 		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(UART);
 
 		//send back data for debugging
-		//USART_Tx(UART, &receiveBuff.data[receiveBuff.writeIndex]);
+		//USART_Tx(UART, receiveBuff.data[receiveBuff.writeIndex]);
 
 		if (receiveBuff.data[receiveBuff.writeIndex] == MAGIC_START_BYTE
 			&& receiveBuff.received_start_byte == false)
@@ -55,7 +45,9 @@ void USART1_RX_IRQHandler(void)
 			}
 		}
 
-		if (++receiveBuff.writeIndex >= BUFFERSIZE)
+		receiveBuff.writeIndex++;
+
+		if (receiveBuff.writeIndex >= BUFFERSIZE)
 		{
 			receiveBuff.writeIndex = 0;
 		}
@@ -64,23 +56,10 @@ void USART1_RX_IRQHandler(void)
 	}
 }
 
+
 void initUart(void)
 {
 	USART_Reset(UART);
-
-	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
-
-	// Start HFXO and wait until it is stable
-	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
-
-	 // Select HFXO as clock source for HFCLK
-	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
-
-	// Enable clock for USART module
-	CMU_ClockEnable(cmuClock_USART1, true);
-
-	// Enable clock for GPIO module (required for pin configuration)
-	CMU_ClockEnable(cmuClock_GPIO, true);
 
 	// Configure GPIO pins
 	GPIO_PinModeSet(UART_PORT, UART_TX_PIN, gpioModePushPull, 1);
@@ -120,6 +99,7 @@ void initUart(void)
 	USART_Enable(UART, usartEnable);
 }
 
+
 uint8_t magic_bytes_received(void)
 {
 	if (receiveBuff.received_start_byte && receiveBuff.received_stop_byte)
@@ -132,6 +112,7 @@ uint8_t magic_bytes_received(void)
 	}
 }
 
+
 uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 {
 	if (magic_bytes_received() == MSG_STATE_MAGIC_BYTES_NOT_RECEIVED)
@@ -140,6 +121,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	}
 
 	int i;
+
 	uint8_t start_index = receiveBuff.start_byte_index;
 	uint8_t stop_index = receiveBuff.stop_byte_index;
 
@@ -150,10 +132,11 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 		return MSG_STATE_RECEIVE_FAIL;
 	}
 
-	if(start_index > stop_index)
+	if (start_index > stop_index)
 	{
 		*receive_data_ptr = (stop_index + BUFFERSIZE + 1) - start_index;
 		receive_data_ptr++;
+
 		for (i = start_index; i < BUFFERSIZE; i++)
 		{
 			*receive_data_ptr = receiveBuff.data[i];
@@ -170,6 +153,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	{
 		*receive_data_ptr = stop_index - start_index + 1;
 		receive_data_ptr++;
+
 		for (i = start_index; i <= stop_index; i++)
 		{
 			*receive_data_ptr = receiveBuff.data[i];
@@ -183,30 +167,6 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	return MSG_STATE_RECEIVE_OK;
 }
 
-void send_vortex_msg(msg_type type)
-{
-	switch(type)
-	{
-		case MSG_TYPE_NOACK:
-			vortex_message.type = MSG_TYPE_NOACK;
-			strcpy(&vortex_message.payload[0], "NO ACK");
-			break;
-		case MSG_TYPE_ACK:
-			vortex_message.type = MSG_TYPE_ACK;
-			strcpy(&vortex_message.payload[0], "ACK!");
-			break;
-		default:
-			vortex_message.type = MSG_TYPE_NOTYPE;
-			break;
-	}
-
-	USART_Tx(UART, vortex_message.magic_start);
-	USART_Tx(UART, vortex_message.type);
-	USART_PutData(&vortex_message.payload[0], (uint8_t)strlen(vortex_message.payload));
-	USART_Tx(UART, vortex_message.magic_stop);
-	USART_PutData("\n\r", 2);
-
-}
 
 void USART_PutData(uint8_t *data_ptr, uint8_t size)
 {
@@ -218,5 +178,3 @@ void USART_PutData(uint8_t *data_ptr, uint8_t size)
 		data_ptr++;
 	}
 }
-
-

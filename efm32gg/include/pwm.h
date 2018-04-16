@@ -6,6 +6,8 @@
 #include "em_gpio.h"
 #include "em_timer.h"
 
+#include "rov_utilities.h"
+
 enum pwm_states
 {
 	PWM_UPDATE_FAIL,
@@ -56,25 +58,12 @@ enum pwm_states
 #define TIMER3_CC_LOCATION TIMER_ROUTE_LOCATION_LOC0
 #define TIMER3_NUM_CHANNELS 1
 
-#define LED_PWM_FREQ 					500
-#define LED_START_PULSE_WIDTH_US 		1500
-
-#define THRUSTER_PWM_FREQ 				500
-#define THRUSTER_START_PULSE_WIDTH_US 	1500
-#define THRUSTER_MAX_PULSE_WIDTH_US 	1900
-#define THRUSTER_MIN_PULSE_WIDTH_US 	1100
-
-#define NUM_THRUSTERS 8
-
 void initPwm(void);
 void initTimer(TIMER_TypeDef *timer,
 				uint32_t pwm_freq,
 				uint32_t pulse_width_freq,
 				uint32_t cc_location,
 				int num_channels);
-uint32_t us_to_comparevalue(uint32_t us);
-uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr);
-uint8_t update_led_pwm(uint8_t *pwm_data_ptr);
 
 void TIMER0_IRQHandler(void);
 void TIMER1_IRQHandler(void);

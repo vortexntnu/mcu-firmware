@@ -7,15 +7,18 @@ void TIMER0_IRQHandler(void)
 	TIMER_IntClear(TIMER0, TIMER_IF_OF);
 }
 
+
 void TIMER1_IRQHandler(void)
 {
 	TIMER_IntClear(TIMER1, TIMER_IF_OF);
 }
 
+
 void TIMER2_IRQHandler(void)
 {
 	TIMER_IntClear(TIMER2, TIMER_IF_OF);
 }
+
 
 void TIMER3_IRQHandler(void)
 {
@@ -23,59 +26,8 @@ void TIMER3_IRQHandler(void)
 
 }
 
-uint32_t us_to_comparevalue(uint32_t us)
-{
-	uint32_t hz_to_us = 1000000 / THRUSTER_PWM_FREQ;
-
-	if((us < THRUSTER_MIN_PULSE_WIDTH_US) || (us > THRUSTER_MAX_PULSE_WIDTH_US))
-	{
-		return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * THRUSTER_START_PULSE_WIDTH_US) / hz_to_us;
-	}
-
-	return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * us) / hz_to_us;
-}
-
-uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
-{
-	int i;
-	uint16_t pwm_data[NUM_THRUSTERS] = {1500};
-
-	for (i = 0; i < NUM_THRUSTERS; i++)
-	{
-		pwm_data[i] = (uint16_t)((*pwm_data_ptr << 8) & 0xFF00);
-		pwm_data_ptr++;
-		pwm_data[i] |= (uint16_t)((*pwm_data_ptr) & 0x00FF);
-		pwm_data_ptr++;
-	}
-
-	int ch;
-
-	for (ch = 0; ch < 3; ch++)
-	{
-		TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch]));
-		TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3]));
-		TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
-	}
-
-	return PWM_UPDATE_OK;
-}
-
-uint8_t update_led_pwm(uint8_t *pwm_data_ptr)
-{
-	return PWM_UPDATE_OK;
-}
-
 void initPwm(void)
 {
-	// Enable clock for GPIO module
-	CMU_ClockEnable(cmuClock_GPIO, true);
-
-	// Enable clock for TIMERn modules
-	CMU_ClockEnable(cmuClock_TIMER0, true);
-	CMU_ClockEnable(cmuClock_TIMER1, true);
-	CMU_ClockEnable(cmuClock_TIMER2, true);
-	CMU_ClockEnable(cmuClock_TIMER3, true);
-
 	// Set compare channel pins as output
 	// TIM0_CCn LOCATION #3
 	GPIO_PinModeSet(THR0_PORT, THR0_PIN, gpioModePushPull, 0);
@@ -108,18 +60,11 @@ void initPwm(void)
 	NVIC_EnableIRQ(TIMER3_IRQn);
 }
 
+
 void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us, uint32_t cc_location, int num_channels)
 {
 	// Reset timer
 	TIMER_Reset(timer);
-
-	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
-
-	// Start HFXO and wait until it is stable
-	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
-
-	 // Select HFXO as clock source for HFPER
-	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFXO);
 
 	TIMER_InitCC_TypeDef timerCCInit =
 	{

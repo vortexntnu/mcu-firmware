@@ -3,10 +3,6 @@
 void initWdog(void)
 {
 
-	CMU_ClockEnable(cmuClock_CORELE, true);
-
-	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
-
 	WDOG_Init_TypeDef wdogInit =
 	{
 		.enable     = true,                // Start watchdog when init done
