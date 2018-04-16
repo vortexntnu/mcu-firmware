@@ -3,7 +3,7 @@ services:
 - docker
 language: c
 addons:
-  ssh_known_hosts: odroid.vortexntnu.no
+  ssh_known_hosts: odroid.vortexntnu.no:2222
 before_install:
 - openssl aes-256-cbc -K $encrypted_4483e7393768_key -iv $encrypted_4483e7393768_iv
   -in travis_odroid_rsa.enc -out /tmp/travis_odroid_rsa -d

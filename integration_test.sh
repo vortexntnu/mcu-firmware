@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rsync -r --quiet $TRAVIS_BUILD_DIR/ vortex@odroid.vortexntnu.no:/home/vortex/motor-control-interface
+rsync -r  $TRAVIS_BUILD_DIR/ -e "ssh -p 2222" vortex@odroid.vortexntnu.no:/home/vortex/motor-control-interface
 
 # TODO: Flash MCU
 
-ssh vortex@odroid.vortexntnu.no pytest -v /home/vortex/motor-control-interface/test
+ssh -p 2222 vortex@odroid.vortexntnu.no "python3 -m pytest -v /home/vortex/motor-control-interface/test"
