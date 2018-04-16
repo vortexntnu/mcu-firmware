@@ -28,15 +28,6 @@ void TIMER3_IRQHandler(void)
 
 void initPwm(void)
 {
-	// Enable clock for GPIO module
-	CMU_ClockEnable(cmuClock_GPIO, true);
-
-	// Enable clock for TIMERn modules
-	CMU_ClockEnable(cmuClock_TIMER0, true);
-	CMU_ClockEnable(cmuClock_TIMER1, true);
-	CMU_ClockEnable(cmuClock_TIMER2, true);
-	CMU_ClockEnable(cmuClock_TIMER3, true);
-
 	// Set compare channel pins as output
 	// TIM0_CCn LOCATION #3
 	GPIO_PinModeSet(THR0_PORT, THR0_PIN, gpioModePushPull, 0);
@@ -74,14 +65,6 @@ void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us,
 {
 	// Reset timer
 	TIMER_Reset(timer);
-
-	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
-
-	// Start HFXO and wait until it is stable
-	CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
-
-	 // Select HFXO as clock source for HFPER
-	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFXO);
 
 	TIMER_InitCC_TypeDef timerCCInit =
 	{
