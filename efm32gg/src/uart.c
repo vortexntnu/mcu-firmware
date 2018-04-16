@@ -2,13 +2,13 @@
 
 struct circularBuffer
 {
-  volatile uint8_t 	data[BUFFERSIZE];		// data buffer
-  volatile uint8_t 	readIndex;         		// read index
-  volatile uint8_t 	writeIndex;        		// write index
-  volatile uint8_t  start_byte_index;		// start byte index
-  volatile uint8_t  stop_byte_index;		// stop byte index
-  volatile bool		received_start_byte;	// MAGIC_START_BYTE is received
-  volatile bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
+	volatile uint8_t 	data[BUFFERSIZE];		// data buffer
+	volatile uint8_t 	readIndex;				// read index
+	volatile uint8_t 	writeIndex;				// write index
+	volatile uint8_t  	start_byte_index;		// start byte index
+	volatile uint8_t  	stop_byte_index;		// stop byte index
+	volatile bool		received_start_byte;	// MAGIC_START_BYTE is received
+	volatile bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
 } receiveBuff, transmitBuff = { {0}, 0, 0, -1, -1, false, false };
 
 
@@ -19,7 +19,7 @@ void USART1_RX_IRQHandler(void)
 		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(UART);
 
 		//send back data for debugging
-		//USART_Tx(UART, &receiveBuff.data[receiveBuff.writeIndex]);
+		//USART_Tx(UART, receiveBuff.data[receiveBuff.writeIndex]);
 
 		if (receiveBuff.data[receiveBuff.writeIndex] == MAGIC_START_BYTE
 			&& receiveBuff.received_start_byte == false)
@@ -45,7 +45,9 @@ void USART1_RX_IRQHandler(void)
 			}
 		}
 
-		if (++receiveBuff.writeIndex >= BUFFERSIZE)
+		receiveBuff.writeIndex++;
+
+		if (receiveBuff.writeIndex >= BUFFERSIZE)
 		{
 			receiveBuff.writeIndex = 0;
 		}
@@ -58,20 +60,6 @@ void USART1_RX_IRQHandler(void)
 void initUart(void)
 {
 	USART_Reset(UART);
-
-	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
-
-	// Start  HFRCO and wait until it is stable
-	CMU_OscillatorEnable(cmuOsc_HFRCO, true, true);
-
-	// Select HFRCO as clock source for HFCLK
-	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
-
-	// Enable clock for USART module
-	CMU_ClockEnable(cmuClock_USART1, true);
-
-	// Enable clock for GPIO module (required for pin configuration)
-	CMU_ClockEnable(cmuClock_GPIO, true);
 
 	// Configure GPIO pins
 	GPIO_PinModeSet(UART_PORT, UART_TX_PIN, gpioModePushPull, 1);
@@ -133,6 +121,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	}
 
 	int i;
+
 	uint8_t start_index = receiveBuff.start_byte_index;
 	uint8_t stop_index = receiveBuff.stop_byte_index;
 
@@ -164,6 +153,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 	{
 		*receive_data_ptr = stop_index - start_index + 1;
 		receive_data_ptr++;
+
 		for (i = start_index; i <= stop_index; i++)
 		{
 			*receive_data_ptr = receiveBuff.data[i];

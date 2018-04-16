@@ -11,7 +11,7 @@
 #include "efm32gg_uart.h"
 #include "efm32gg942f1024.h"
 
-#define BUFFERSIZE 256
+#define BUFFERSIZE 128
 
 extern struct circularBuffer receiveBuff;
 
