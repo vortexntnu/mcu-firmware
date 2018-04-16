@@ -52,6 +52,7 @@ set(SOURCES
   efm32gg/src/pwm.c
   efm32gg/src/uart.c
   efm32gg/src/watchdog.c
+  efm32gg/src/rov_utilities.c
 )
 
 ##### Outputs #####
