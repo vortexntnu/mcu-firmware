@@ -18,12 +18,19 @@ extern "C" {
   #include "crc.h"
 }
 
+typedef enum msg_type
+{
+    MSG_TYPE_NOTYPE,
+    MSG_TYPE_THRUSTER   = 0x41,
+    MSG_TYPE_LED        = 0x42,
+    MSG_TYPE_HEARTBEAT  = 0x43,
+    MSG_TYPE_ACK        = 0x44,
+    MSG_TYPE_NOACK      = 0x45,
+    MSG_TYPE_ARM        = 0x46,
+    MSG_TYPE_DISARM     = 0x47,
+}msg_type;
+
 #define MAGIC_START_BYTE    0x24
-#define MSG_TYPE_THRUSTER   0x41
-#define MSG_TYPE_LIGHT      0x42
-#define MSG_TYPE_HEARTBEAT  0x43
-#define MSG_TYPE_ARM        0x46
-#define MSG_TYPE_DISARM     0x47
 #define MAGIC_STOP_BYTE     0x40
 
 #define MAX_PAYLOAD_SIZE 16
@@ -43,8 +50,8 @@ class SerialCom
         private:
                 int m_dev = 0;
                 char m_read_buffer[MAX_MSG_SIZE];
-                char m_thruster_cmd[MAX_MSG_SIZE];
-                char m_heartbeat_cmd[MSG_HEARTBEAT_SIZE];
+                char m_thruster_cmd[MAX_MSG_SIZE] = {0};
+                char m_heartbeat_cmd[MSG_HEARTBEAT_SIZE] = {5};
 
         public:
                 void thruster_pwm_callback(const vortex_msgs::Pwm& msg);
