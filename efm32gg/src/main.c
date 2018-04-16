@@ -2,7 +2,6 @@
 
 #include "em_rmu.h"
 #include "em_letimer.h"
-#include "efm32gg942f1024.h"
 
 #include "uart.h"
 #include "pwm.h"
@@ -14,13 +13,39 @@ int main()
 {
 	CHIP_Init();
 
-	initUart();
+	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
+	CMU_ClockDivSet(cmuClock_HFPER, cmuClkDiv_1);
+	// Start HFRCO (should be HFXO) and wait until it is stable
+	CMU_OscillatorEnable(cmuOsc_HFRCO, true, true);
+	 // Select HFRCO (should be HFXO) as clock source for HFPER
+	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFRCO);
+	// Enable HFPER
+	CMU_ClockEnable(cmuClock_HFPER, true);
+	// Enable clock for USART module
+	CMU_ClockEnable(cmuClock_USART1, true);
+	// Enable clock for GPIO module
+	CMU_ClockEnable(cmuClock_GPIO, true);
+	// Enable clock for TIMERn modules
+	CMU_ClockEnable(cmuClock_TIMER0, true);
+	CMU_ClockEnable(cmuClock_TIMER1, true);
+	CMU_ClockEnable(cmuClock_TIMER2, true);
+	CMU_ClockEnable(cmuClock_TIMER3, true);
+	// Low energy timer
+	CMU_ClockEnable(cmuClock_CORELE, true);
+	CMU_OscillatorEnable(cmuOsc_ULFRCO, true, true);
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_ULFRCO);
+	CMU_ClockEnable(cmuClock_LETIMER0, true);
+	// Watchdog
+	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
+	CMU_ClockSelectSet(cmuClock_CORELE, cmuSelect_LFRCO);
+
 	initPwm();
+	initUart();
 	initWdog();
 	initLeTimer();
 
 	GPIO_PinModeSet(LED1_PORT, LED1_PIN, gpioModePushPullDrive, 1);
-	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 1);
+	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 0);
 
 	unsigned long resetCause = RMU_ResetCauseGet();
 	RMU_ResetCauseClear();
@@ -44,6 +69,7 @@ int main()
 	uint8_t msg_type = MSG_TYPE_NOTYPE;
 
 	start_sequence();
+	arm_sequence();
 
 	while (1)
 	{
@@ -54,6 +80,9 @@ int main()
 				{
 					send_vortex_msg(MSG_TYPE_ACK);
 					msg_type = receive_data[VORTEX_MSG_TYPE_INDEX];
+					strcpy(uart_msg_ptr, "CRC_PASSED()\n\r");
+					USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+					WDOGn_Feed(WDOG);
 				}
 				else
 				{
@@ -80,7 +109,7 @@ int main()
 				break;
 
 			case MSG_STATE_RECEIVE_FAIL:
-				msg_type = MSG_TYPE_NOTYPE;
+				msg_type = MSG_TYPE_NOACK;
 				break;
 
 			default:
@@ -90,18 +119,19 @@ int main()
 
 		switch (msg_type)
 		{
-			case MSG_TYPE_NOTYPE:
-				// check how long since last heartbeat?
-				break;
-
 			case MSG_TYPE_THRUSTER:
+				strcpy(uart_msg_ptr, "THRUSTER\n\r");
+				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 				if (update_thruster_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
 				{
-					//error handling
+					strcpy(uart_msg_ptr, "ROV NOT ARMED\n\r");
+					USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 				}
 				break;
 
 			case MSG_TYPE_LED:
+				strcpy(uart_msg_ptr, "THRUSTER\n\r");
+				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 				if (update_led_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
 				{
 					//error handling
@@ -122,8 +152,18 @@ int main()
 				WDOGn_Feed(WDOG);
 				break;
 
+			case MSG_TYPE_NOTYPE:
+				strcpy(uart_msg_ptr, "NOTYPE\n\r");
+				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+				break;
+
+			case MSG_TYPE_NOACK:
+				break;
+
 			default:
 				break;
-		}
-	}
-}
+		} // switch
+		msg_type = MSG_TYPE_NOTYPE;
+		memset(&receive_data[0], 0, sizeof(receive_data));
+	} // while
+} // main
