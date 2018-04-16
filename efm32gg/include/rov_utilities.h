@@ -13,6 +13,8 @@
 #include "uart.h"
 #include "watchdog.h"
 
+
+
 #define MAGIC_START_BYTE 	0x24
 #define MAGIC_STOP_BYTE 	0x40
 
@@ -22,10 +24,10 @@
 #define VORTEX_MSG_START_DATA_INDEX 3
 #define VORTEX_MSG_CRC_BYTE_INDEX 	19
 
-#define LETIMER_MS 					250		// how often LETIMER0_IRQHandler triggers in milliseconds
+#define LETIMER_MS 					100		// how often LETIMER0_IRQHandler triggers in milliseconds
 #define ARM_SEQUENCE_DURATION_MS 	2000
 #define DISARM_SEQUENCE_DURATION_MS	2000
-#define START_SEQUENCE_DURATION_MS 	3000
+#define START_SEQUENCE_DURATION_MS 	2500
 
 #define LED1_PORT 	gpioPortE
 #define LED1_PIN  	12
@@ -41,6 +43,14 @@
 #define THRUSTER_MIN_PULSE_WIDTH_US 	1100
 
 #define NUM_THRUSTERS 8
+
+enum sequence_type
+{
+	NO_SEQUENCE,
+	SEQUENCE_START,
+	SEQUENCE_ARM,
+	SEQUENCE_DISARM,
+}sequence_type;
 
 typedef enum msg_state
 {

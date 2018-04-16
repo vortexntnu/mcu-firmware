@@ -10,15 +10,10 @@ struct vortex_msg
 	uint8_t		magic_stop;					// stop transmission byte
 } vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
 
-bool start_sequence_finished = false;
-uint16_t start_sequence_passed_ms = 0;
-
-bool arm_sequence_finished = false;
-uint16_t arm_sequence_passed_ms = 0;
-
-bool disarm_sequence_finished = false;
-uint16_t disarm_sequence_passed_ms = 0;
-
+bool sequence_finished = false;
+bool rov_armed = false;
+uint16_t sequence_passed_ms = 0;
+uint8_t sequence_type = SEQUENCE_START;
 
 uint32_t us_to_comparevalue(uint32_t us)
 {
@@ -36,28 +31,43 @@ uint32_t us_to_comparevalue(uint32_t us)
 
 uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 {
-	int i;
-	uint16_t pwm_data[NUM_THRUSTERS];
-
-	// convert 16 x two bytes to 8 x uint16_t
-	for (i = 0; i < NUM_THRUSTERS; i++)
+	if (rov_armed == true)
 	{
-		pwm_data[i] = (uint16_t)((*pwm_data_ptr << 8) & 0xFF00);	// msb
-		pwm_data_ptr++;
-		pwm_data[i] |= (uint16_t)((*pwm_data_ptr) & 0x00FF);		// lsb
-		pwm_data_ptr++;
+		int i;
+		uint16_t pwm_data[NUM_THRUSTERS];
+
+		// convert 16 x two bytes to 8 x uint16_t
+		for (i = 0; i < NUM_THRUSTERS; i++)
+		{
+			pwm_data[i] = (uint16_t)((*pwm_data_ptr << 8) & 0xFF00);	// msb
+			pwm_data_ptr++;
+			pwm_data[i] |= (uint16_t)((*pwm_data_ptr) & 0x00FF);		// lsb
+			pwm_data_ptr++;
+		}
+
+		int ch;
+
+		for (ch = 0; ch < 3; ch++)
+		{
+			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch]));
+			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3]));
+			TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
+		}
+
+		return PWM_UPDATE_OK;
 	}
-
-	int ch;
-
-	for (ch = 0; ch < 3; ch++)
+	else
 	{
-		TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch]));
-		TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3]));
-		TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
-	}
+		int ch;
 
-	return PWM_UPDATE_OK;
+		for (ch = 0; ch < 3; ch++)
+		{
+			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US));
+			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US));
+			TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US));
+		}
+		return PWM_UPDATE_FAIL;
+	}
 }
 
 
@@ -77,24 +87,25 @@ void start_sequence(void)
 	char uart_msg[50] = {0};
 	char* uart_msg_ptr = &uart_msg[0];
 
-	start_sequence_finished = false;
-	disarm_sequence_finished = false;
-	arm_sequence_finished = false;
+	sequence_type = SEQUENCE_START;
+	sequence_passed_ms = 0;
 
-	while (start_sequence_finished == false)
+	while (sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
 
 	GPIO_PinOutSet(LED1_PORT, LED1_PIN);
-	GPIO_PinOutSet(LED2_PORT, LED2_PIN);
+	GPIO_PinOutClear(LED2_PORT, LED2_PIN);
+
+	sequence_finished = false;
+	rov_armed = false;
 
 	strcpy(uart_msg_ptr, "MCU initialization finished...\n\r");
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	NVIC_EnableIRQ(USART1_RX_IRQn);
-
 }
 
 
@@ -109,19 +120,23 @@ void disarm_sequence(void)
 
 	uint8_t pwm_signals[NUM_THRUSTERS * 2] = {0};
 
+	sequence_type = SEQUENCE_DISARM;
+	sequence_passed_ms = 0;
+
 	strcpy(uart_msg_ptr, "DISARMING start\n\r");
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
-	while (disarm_sequence_finished == false)
+	while (sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
 
+	sequence_finished = false;
+	rov_armed = false;
+
 	strcpy(uart_msg_ptr, "DISARMING finished\n\r");
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
-
-	arm_sequence_finished = false;
 
 	NVIC_EnableIRQ(USART1_RX_IRQn);
 
@@ -139,7 +154,9 @@ void arm_sequence(void)
 	strcpy(uart_msg_ptr, "ARMING start\n\r");
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
-	uint8_t pwm_signals[NUM_THRUSTERS * 2];
+	uint8_t pwm_signals[NUM_THRUSTERS * 2] = {0};
+	sequence_type = SEQUENCE_ARM;
+	sequence_passed_ms = 0;
 
 	// convert 0b10111011100 (1500) to two bytes
 	for (int i = 0; i < NUM_THRUSTERS; i++)
@@ -148,59 +165,62 @@ void arm_sequence(void)
 		pwm_signals[i*2 + 1]  = 0b11011100; // low bits
 	}
 
-	while (arm_sequence_finished == false)
+	rov_armed = true;
+
+	while (sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
 
+	sequence_finished = false;
+
+
 	strcpy(uart_msg_ptr, "ARMING finished\n\r");
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
-	disarm_sequence_finished = false;
-
 	NVIC_EnableIRQ(USART1_RX_IRQn);
-
 }
 
 
 void LETIMER0_IRQHandler(void)
 {
-	if (start_sequence_finished == false)
+	sequence_passed_ms += LETIMER_MS;
+	switch(sequence_type)
 	{
-		start_sequence_passed_ms += LETIMER_MS;
+		case SEQUENCE_START:
+			if(sequence_passed_ms >= START_SEQUENCE_DURATION_MS)
+			{
+				sequence_finished = true;
+				sequence_passed_ms = 0;
+				sequence_type = NO_SEQUENCE;
+				NVIC_DisableIRQ(LETIMER0_IRQn);
+			}
+			break;
+
+		case SEQUENCE_ARM:
+			if(sequence_passed_ms >= ARM_SEQUENCE_DURATION_MS)
+			{
+				sequence_finished = true;
+				sequence_passed_ms = 0;
+				sequence_type = NO_SEQUENCE;
+				NVIC_DisableIRQ(LETIMER0_IRQn);
+			}
+			break;
+
+		case SEQUENCE_DISARM:
+			if(sequence_passed_ms >= ARM_SEQUENCE_DURATION_MS)
+			{
+				sequence_finished = true;
+				sequence_passed_ms = 0;
+				sequence_type = NO_SEQUENCE;
+				NVIC_DisableIRQ(LETIMER0_IRQn);
+			}
+			break;
+
+		default:
+			break;
 	}
-
-	if (start_sequence_passed_ms >= START_SEQUENCE_DURATION_MS)
-	{
-			start_sequence_finished = true;
-			NVIC_DisableIRQ(LETIMER0_IRQn);
-	}
-
-	if (arm_sequence_finished == false)
-	{
-		arm_sequence_passed_ms += LETIMER_MS;
-	}
-
-	if (arm_sequence_passed_ms >= ARM_SEQUENCE_DURATION_MS)
-	{
-		arm_sequence_finished = true;
-		NVIC_DisableIRQ(LETIMER0_IRQn);
-
-	}
-
-	if (disarm_sequence_finished == false)
-	{
-		disarm_sequence_passed_ms += LETIMER_MS;
-	}
-
-	if (disarm_sequence_passed_ms >= DISARM_SEQUENCE_DURATION_MS)
-	{
-		disarm_sequence_finished = true;
-		NVIC_DisableIRQ(LETIMER0_IRQn);
-
-	}
-
 	LETIMER_IntClear(LETIMER0, LETIMER_IF_UF);
 	LETIMER0->CNT = LETIMER_MS;
 
@@ -267,15 +287,6 @@ void initLeTimer(void)
 	  .ufoa1          = letimerUFOAToggle,	// Toggle output on output 1
 	  .repMode        = letimerRepeatFree 	// Count until stopped
 	};
-
-	CMU_ClockEnable(cmuClock_HFLE, true);
-
-	CMU_OscillatorEnable(cmuOsc_ULFRCO, true, true);
-
-	// The clock source of LETIMER0
-	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_ULFRCO);
-
-	CMU_ClockEnable(cmuClock_LETIMER0, true);
 
 	// Time out value configuration
 	LETIMER_CompareSet(LETIMER0, 0, LETIMER_MS);
