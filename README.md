@@ -1,5 +1,5 @@
-# motor_control_interface
-[![Build Status](https://travis-ci.org/vortexntnu/motor-control-interface.svg?branch=master)](https://travis-ci.org/vortexntnu/motor-control-interface)
+# MCU firmware
+[![Build Status](https://travis-ci.org/vortexntnu/mcu-firmware.svg?branch=master)](https://travis-ci.org/vortexntnu/mcu-firmware)
 
 MCU interface with electronic speed controller (ESC). Prototyping is done on an
 EFM32 Giant Gecko 3700 Starter Kit.

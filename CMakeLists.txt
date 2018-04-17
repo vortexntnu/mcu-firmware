@@ -17,7 +17,7 @@ include(${BASE_LOCATION}/toolchain/arm-gcc.cmake)
 ##### Project Setup #####
 
 # Set our output target
-set(TARGET motor-control-interface)
+set(TARGET mcu-firmware)
 
 # Configure project and languages
 project(${TARGET} C CXX ASM)
