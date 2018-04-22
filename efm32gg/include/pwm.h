@@ -60,7 +60,7 @@ enum pwm_states
 
 void initPwm(void);
 void initTimer(TIMER_TypeDef *timer,
-				uint32_t pwm_freq,
+				uint32_t pwm_freq_scaling_factor,
 				uint32_t pulse_width_freq,
 				uint32_t cc_location,
 				int num_channels);

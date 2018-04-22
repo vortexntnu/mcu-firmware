@@ -48,10 +48,10 @@ void initPwm(void)
 	GPIO_PinModeSet(LIGHT1_PORT, LIGHT1_PIN, gpioModePushPull, 0);
 
 	// Setup and initialize timers
-	initTimer(TIMER0, THRUSTER_PWM_FREQ, THRUSTER_START_PULSE_WIDTH_US, TIMER0_CC_LOCATION, TIMER0_NUM_CHANNELS);
-	initTimer(TIMER1, THRUSTER_PWM_FREQ, THRUSTER_START_PULSE_WIDTH_US, TIMER1_CC_LOCATION, TIMER1_NUM_CHANNELS);
-	initTimer(TIMER2, THRUSTER_PWM_FREQ, THRUSTER_START_PULSE_WIDTH_US, TIMER2_CC_LOCATION, TIMER2_NUM_CHANNELS);
-	initTimer(TIMER3, LED_PWM_FREQ, 	 LED_START_PULSE_WIDTH_US,		TIMER3_CC_LOCATION, TIMER3_NUM_CHANNELS);
+	initTimer(TIMER0, PWM_FREQ_SCALING, THRUSTER_START_PULSE_WIDTH_US, TIMER0_CC_LOCATION, TIMER0_NUM_CHANNELS);
+	initTimer(TIMER1, PWM_FREQ_SCALING, THRUSTER_START_PULSE_WIDTH_US, TIMER1_CC_LOCATION, TIMER1_NUM_CHANNELS);
+	initTimer(TIMER2, PWM_FREQ_SCALING, THRUSTER_START_PULSE_WIDTH_US, TIMER2_CC_LOCATION, TIMER2_NUM_CHANNELS);
+	initTimer(TIMER3, LED_PWM_SCALING, 	 LED_START_PULSE_WIDTH_US,	   TIMER3_CC_LOCATION, TIMER3_NUM_CHANNELS);
 
 	// Enable TIMERn interrupt vector in NVIC
 	NVIC_EnableIRQ(TIMER0_IRQn);
@@ -61,7 +61,7 @@ void initPwm(void)
 }
 
 
-void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us, uint32_t cc_location, int num_channels)
+void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq_scaling_factor, uint32_t pulse_width_us, uint32_t cc_location, int num_channels)
 {
 	// Reset timer
 	TIMER_Reset(timer);
@@ -112,9 +112,9 @@ void initTimer(TIMER_TypeDef *timer, uint32_t pwm_freq, uint32_t pulse_width_us,
 	};
 
 	// Set Top Value
-	TIMER_TopSet(timer, CMU_ClockFreqGet(cmuClock_HFPER)/pwm_freq);
+	TIMER_TopSet(timer, CMU_ClockFreqGet(cmuClock_HFPER)/pwm_freq_scaling_factor);
 
-	uint32_t compareValue = us_to_comparevalue(pulse_width_us);
+	uint32_t compareValue = us_to_comparevalue(pulse_width_us, timer);
 
 	// Set initial compare value for compare channels
 	for (ch = 0; ch < num_channels; ch++)
