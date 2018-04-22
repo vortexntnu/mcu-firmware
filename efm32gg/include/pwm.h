@@ -16,9 +16,6 @@ enum pwm_states
 
 #define TIMER_ROUTE_CCPEN(ch) (0x1UL << ch)
 
-#define TIMER0_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
-#define TIMER0_NUM_CHANNELS 3
-
 #define THR0_PORT 	gpioPortD
 #define THR0_PIN	1
 
@@ -49,6 +46,9 @@ enum pwm_states
 #define LIGHT1_PORT	gpioPortE
 #define LIGHT1_PIN	14
 
+#define TIMER0_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
+#define TIMER0_NUM_CHANNELS 3
+
 #define TIMER1_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
 #define TIMER1_NUM_CHANNELS 3
 
@@ -60,7 +60,7 @@ enum pwm_states
 
 void initPwm(void);
 void initTimer(TIMER_TypeDef *timer,
-				uint32_t pwm_freq,
+				uint32_t pwm_freq_scaling_factor,
 				uint32_t pulse_width_freq,
 				uint32_t cc_location,
 				int num_channels);
