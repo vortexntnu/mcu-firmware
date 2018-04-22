@@ -15,17 +15,14 @@ bool rov_armed = false;
 uint16_t sequence_passed_ms = 0;
 uint8_t sequence_type = SEQUENCE_START;
 
-uint32_t us_to_comparevalue(uint32_t us)
+uint32_t us_to_comparevalue(uint32_t us, TIMER_TypeDef *timer)
 {
-	uint32_t hz_to_us = 1000000 / THRUSTER_PWM_FREQ;
-
 	if((us < THRUSTER_MIN_PULSE_WIDTH_US) || (us > THRUSTER_MAX_PULSE_WIDTH_US))
 	{
 		return THRUSTER_START_PULSE_WIDTH_US;
-		//return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * THRUSTER_START_PULSE_WIDTH_US) / hz_to_us;
 	}
 
-	return ((CMU_ClockFreqGet(cmuClock_HFPER) / THRUSTER_PWM_FREQ) * us) / hz_to_us;
+	return (TIMER_TopGet(timer) / THRUSTER_PWM_PERIOD) * us;
 }
 
 
@@ -49,9 +46,9 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 
 		for (ch = 0; ch < 3; ch++)
 		{
-			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch]));
-			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3]));
-			if (ch <= 2) TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
+			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch], TIMER0));
+			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3], TIMER1));
+			if (ch <= 2) TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5], TIMER2));
 		}
 
 		return PWM_UPDATE_OK;
@@ -62,9 +59,9 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 
 		for (ch = 0; ch < 3; ch++)
 		{
-			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US));
-			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US));
-			TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US));
+			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, TIMER0));
+			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, TIMER1));
+			if (ch <= 2) TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, TIMER2));
 		}
 		return PWM_UPDATE_FAIL;
 	}
