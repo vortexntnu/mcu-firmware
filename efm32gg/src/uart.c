@@ -69,9 +69,9 @@ void initUart(void)
 	USART_InitAsync_TypeDef uartInit = USART_INITASYNC_DEFAULT;
 
 	uartInit.enable       = usartDisable;  	// Don't enable UART upon intialization
-	uartInit.refFreq      = 0;              // Provide information on reference frequency. When set to 0, the reference frequency is
+	uartInit.refFreq      = 0; 				// Provide information on reference frequency
 	uartInit.baudrate     = 115200;        	// Baud rate
-	uartInit.oversampling = usartOVS16;     // Oversampling. Range is 4x, 6x, 8x or 16x
+	uartInit.oversampling = usartOVS4;      // Oversampling. Range is 4x, 6x, 8x or 16x
 	uartInit.databits     = usartDatabits8; // Number of data bits. Range is 4 to 10
 	uartInit.parity       = usartNoParity;  // Parity mode
 	uartInit.stopbits     = usartStopbits1; // Number of stop bits. Range is 0 to 2
@@ -94,6 +94,8 @@ void initUart(void)
 
 	// Enable UART RX/TX PINS on UART_LOCATION
 	UART->ROUTE = UART_ROUTE_RXPEN | UART_ROUTE_TXPEN | UART_LOCATION;
+
+	USART_BaudrateSyncSet(UART, 0, 115200);
 
 	// Enable UART
 	USART_Enable(UART, usartEnable);
