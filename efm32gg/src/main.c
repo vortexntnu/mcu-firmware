@@ -21,8 +21,12 @@ int main()
 
 	initPwm();
 	initUart();
-	//initWdog();
+	initWdog();
 	initLeTimer();
+
+	volatile uint32_t hz_hfper = CMU_ClockFreqGet(cmuClock_HFPER);
+	volatile uint32_t hz_hf = CMU_ClockFreqGet(cmuClock_HF);
+	volatile uint32_t br = USART_BaudrateGet(UART);
 
 	GPIO_PinModeSet(LED1_PORT, LED1_PIN, gpioModePushPullDrive, 1);
 	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 0);
@@ -156,17 +160,30 @@ void timerSetup(void)
 {
 
 	// Set clock dividers
-	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_2);
+	CMU_ClockDivSet(cmuClock_HF, cmuClkDiv_1);
 	CMU_ClockDivSet(cmuClock_HFPER, cmuClkDiv_1);
 
-	// Start HFRCO
-	CMU_OscillatorEnable(cmuOsc_HFRCO, true, true);
+	CMU_HFXOInit_TypeDef hfxoInit =
+	{
+	   _CMU_CTRL_HFXOBOOST_100PCENT,   // 100% HFXO boost
+	   _CMU_CTRL_HFXOTIMEOUT_16KCYCLES,// 16k startup delay
+	   false,                          // Enable glitch detector
+	   cmuOscMode_Crystal,             // Crystal oscillator
+	};
 
-	 // Select HFRCO  as clock source for HFCORECLOCK
-	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+	CMU_HFXOInit(&hfxoInit);
+
+	// Select HFXO  as clock source for HFPER
+	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFXO);
+
+	 // Select HFXO  as clock source for HFCORECLOCK
+	CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+
+	// Enable HFPER (High Frequency Peripheral Clock)
+	CMU_ClockEnable(cmuClock_HFPER, true);
 
 	// Disable HFRCO
-	//CMU_OscillatorEnable(cmuOsc_HFRCO, false, false);
+	CMU_OscillatorEnable(cmuOsc_HFRCO, false, false);
 
 	// Enable clock for USART module
 	CMU_ClockEnable(cmuClock_USART1, true);
@@ -190,35 +207,4 @@ void timerSetup(void)
 	CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
 	CMU_ClockSelectSet(cmuClock_CORELE, cmuSelect_LFRCO);
 
-	CMU_HFXOInit_TypeDef hfxoInit =
-	{
-	   _CMU_CTRL_HFXOBOOST_100PCENT,   // 100% HFXO boost
-	   _CMU_CTRL_HFXOTIMEOUT_16KCYCLES,// 16k startup delay
-	   false,                          // Enable glitch detector
-	   cmuOscMode_Crystal,             // Crystal oscillator
-	};
-
-	CMU_HFXOInit(&hfxoInit);
-	//CMU->CTRL |= (CMU->CTRL & ~_CMU_CTRL_HFXOMODE_MASK) | _CMU_CTRL_HFXOMODE_XTAL;
-
-	CMU_IntEnable(CMU_IEN_HFXORDY);
-	NVIC_ClearPendingIRQ(CMU_IRQn);
-	NVIC_EnableIRQ(CMU_IRQn);
-
-	// Select HFXO  as clock source for HFPER
-	CMU_ClockSelectSet(cmuClock_HFPER, cmuSelect_HFXO);
-
-	// Start HFXO
-	//CMU_OscillatorEnable(cmuOsc_HFXO, true, false);
-	CMU->OSCENCMD = 0x02;//CMU_OSCENCMD_HFXOEN;
-
-	// Enable HFPER (High Frequency Peripheral Clock)
-	CMU_ClockEnable(cmuClock_HFPER, true);
-
-
-}
-
-void CMU_IRQHandler(void)
-{
-	CMU_IntClear(_CMU_IFC_MASK);
 }
