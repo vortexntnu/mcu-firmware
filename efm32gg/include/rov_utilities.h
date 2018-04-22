@@ -13,8 +13,6 @@
 #include "uart.h"
 #include "watchdog.h"
 
-
-
 #define MAGIC_START_BYTE 	0x24
 #define MAGIC_STOP_BYTE 	0x40
 
@@ -27,12 +25,16 @@
 #define LETIMER_MS 					100		// how often LETIMER0_IRQHandler triggers in milliseconds
 #define ARM_SEQUENCE_DURATION_MS 	2000
 #define DISARM_SEQUENCE_DURATION_MS	2000
-#define START_SEQUENCE_DURATION_MS 	2500
+#define START_SEQUENCE_DURATION_MS 	2000
 
 #define LED1_PORT 	gpioPortE
 #define LED1_PIN  	12
 #define LED2_PORT 	gpioPortE
 #define LED2_PIN  	13
+
+#define HFXO_POS_PIN	13
+#define HFXO_NEG_PIN 	14
+#define HFXO_PORT		gpioPortB
 
 #define LED_PWM_FREQ 					500
 #define LED_START_PULSE_WIDTH_US 		1500

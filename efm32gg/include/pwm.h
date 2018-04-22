@@ -16,9 +16,6 @@ enum pwm_states
 
 #define TIMER_ROUTE_CCPEN(ch) (0x1UL << ch)
 
-#define TIMER0_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
-#define TIMER0_NUM_CHANNELS 3
-
 #define THR0_PORT 	gpioPortD
 #define THR0_PIN	1
 
@@ -48,6 +45,9 @@ enum pwm_states
 
 #define LIGHT1_PORT	gpioPortE
 #define LIGHT1_PIN	14
+
+#define TIMER0_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
+#define TIMER0_NUM_CHANNELS 3
 
 #define TIMER1_CC_LOCATION TIMER_ROUTE_LOCATION_LOC3
 #define TIMER1_NUM_CHANNELS 3

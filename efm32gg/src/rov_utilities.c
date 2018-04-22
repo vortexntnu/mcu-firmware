@@ -51,7 +51,7 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 		{
 			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch]));
 			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3]));
-			TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
+			if (ch <= 2) TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5]));
 		}
 
 		return PWM_UPDATE_OK;
@@ -89,6 +89,8 @@ void start_sequence(void)
 
 	sequence_type = SEQUENCE_START;
 	sequence_passed_ms = 0;
+
+	rov_armed = true;
 
 	while (sequence_finished == false)
 	{
