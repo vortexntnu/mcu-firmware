@@ -31,8 +31,12 @@ void USART1_RX_IRQHandler(void)
 		if ((receiveBuff.data[receiveBuff.writeIndex] == MAGIC_STOP_BYTE)
 			&& (receiveBuff.received_start_byte == true))
 		{
+			if(((receiveBuff.writeIndex - receiveBuff.start_byte_index) <= VORTEX_MSG_START_DATA_INDEX)
+				 || ((receiveBuff.writeIndex - receiveBuff.start_byte_index) > (VORTEX_MSG_MAX_SIZE -1)))
+			{
 			receiveBuff.received_stop_byte = true;
 			receiveBuff.stop_byte_index = receiveBuff.writeIndex;
+			}
 		}
 
 		if ((receiveBuff.received_start_byte == true)
@@ -94,8 +98,6 @@ void initUart(void)
 
 	// Enable UART RX/TX PINS on UART_LOCATION
 	UART->ROUTE = UART_ROUTE_RXPEN | UART_ROUTE_TXPEN | UART_LOCATION;
-
-	USART_BaudrateSyncSet(UART, 0, 115200);
 
 	// Enable UART
 	USART_Enable(UART, usartEnable);
