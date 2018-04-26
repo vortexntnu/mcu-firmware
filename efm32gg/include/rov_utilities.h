@@ -13,6 +13,61 @@
 #include "uart.h"
 #include "watchdog.h"
 
+#define THR0_PORT 	gpioPortD
+#define THR0_PIN	3
+#define THR0_TIM	TIMER0
+#define THR0_CC		2
+#define THR0_LOC	TIMER_ROUTE_LOCATION_LOC3
+
+#define THR1_PORT	gpioPortB
+#define THR1_PIN	11
+#define THR1_TIM	TIMER1
+#define THR1_CC		2
+#define THR1_LOC	TIMER_ROUTE_LOCATION_LOC3
+
+#define THR2_PORT	gpioPortD
+#define THR2_PIN	1
+#define THR2_TIM	TIMER0
+#define THR2_CC		0
+#define THR2_LOC	TIMER_ROUTE_LOCATION_LOC3
+
+#define THR3_PORT	gpioPortD
+#define THR3_PIN	2
+#define THR3_TIM	TIMER0
+#define THR3_CC		1
+#define THR3_LOC	TIMER_ROUTE_LOCATION_LOC3
+
+#define THR4_PORT	gpioPortA
+#define THR4_PIN	12
+#define THR4_TIM	TIMER2
+#define THR4_CC		0
+#define THR4_LOC	TIMER_ROUTE_LOCATION_LOC1
+
+#define THR5_PORT	gpioPortA
+#define THR5_PIN	13
+#define THR5_TIM	TIMER2
+#define THR5_CC		1
+#define THR5_LOC	TIMER_ROUTE_LOCATION_LOC1
+
+#define THR6_PORT	gpioPortB
+#define THR6_PIN	7
+#define THR6_TIM	TIMER1
+#define THR6_CC		0
+#define THR6_LOC	TIMER_ROUTE_LOCATION_LOC3
+
+#define THR7_PORT	gpioPortB
+#define THR7_PIN	8
+#define THR7_TIM	TIMER1
+#define THR7_CC		1
+#define THR7_LOC	TIMER_ROUTE_LOCATION_LOC3
+
+#define LIGHT0_PORT	gpioPortA
+#define LIGHT0_PIN	14
+
+#define LIGHT1_PORT	gpioPortE
+#define LIGHT1_PIN	14
+
+
 #define MAGIC_START_BYTE 				0x24
 #define MAGIC_STOP_BYTE 				0x40
 
@@ -75,7 +130,6 @@ typedef enum msg_type
 	MSG_TYPE_ARM 		= 0x46,
 	MSG_TYPE_DISARM 	= 0x47,
 }msg_type;
-
 
 void start_sequence(void);
 void arm_sequence(void);

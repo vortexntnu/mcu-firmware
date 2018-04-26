@@ -1,10 +1,5 @@
 #include <string.h>
 
-#include "em_rmu.h"
-#include "em_letimer.h"
-
-#define _CMU_HFXOCTRL_AUTOSTARTEM0EM1_MASK
-
 #include "uart.h"
 #include "pwm.h"
 #include "crc.h"
@@ -23,10 +18,6 @@ int main()
 	initUart();
 	initWdog();
 	initLeTimer();
-
-	volatile uint32_t hz_hfper = CMU_ClockFreqGet(cmuClock_HFPER);
-	volatile uint32_t hz_hf = CMU_ClockFreqGet(cmuClock_HF);
-	volatile uint32_t br = USART_BaudrateGet(UART);
 
 	GPIO_PinModeSet(LED1_PORT, LED1_PIN, gpioModePushPullDrive, 1);
 	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 0);

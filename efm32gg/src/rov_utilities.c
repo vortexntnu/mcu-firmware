@@ -1,5 +1,15 @@
 #include "rov_utilities.h"
 
+struct thruster_config
+{
+	TIMER_TypeDef * timer[NUM_THRUSTERS];		// Timers the thruster pins are connected to
+	uint8_t			cc[NUM_THRUSTERS];			// Compare channel thrusters
+	uint32_t 		location[NUM_THRUSTERS];	// Pinout location
+} thruster = {
+	{THR0_TIM, 	THR1_TIM, 	THR2_TIM,	THR3_TIM,	THR4_TIM,	THR5_TIM,	THR6_TIM, 	THR7_TIM},
+	{THR0_CC, 	THR1_CC,	THR2_CC, 	THR3_CC, 	THR4_CC, 	THR5_CC, 	THR6_CC, 	THR7_CC},
+	{THR0_LOC, 	THR1_LOC,	THR2_LOC, 	THR3_LOC, 	THR4_LOC, 	THR5_LOC, 	THR6_LOC,	THR7_LOC}};
+
 struct vortex_msg
 {
 	uint8_t 	magic_start;				// start transmission byte
@@ -42,13 +52,11 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 			pwm_data_ptr++;
 		}
 
-		int ch;
+		int thr = 0;
 
-		for (ch = 0; ch < 3; ch++)
+		for (thr = 0; thr < NUM_THRUSTERS; thr++)
 		{
-			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(pwm_data[ch], TIMER0));
-			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(pwm_data[ch + 3], TIMER1));
-			if (ch <= 2) TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(pwm_data[ch + 5], TIMER2));
+			TIMER_CompareBufSet(thruster.timer[thr],thruster.cc[thr], us_to_comparevalue(pwm_data[thr], thruster.timer[thr]));
 		}
 
 		return PWM_UPDATE_OK;
