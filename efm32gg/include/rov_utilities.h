@@ -105,14 +105,14 @@
 
 enum thruster_mapping
 {
-	THR0,
-	THR1,
-	THR2,
-	THR3,
-	THR4,
 	THR5,
+	THR4,
 	THR6,
 	THR7,
+	THR1,
+	THR0,
+	THR2,
+	THR3,
 }thruster_mapping;
 
 enum sequence_type

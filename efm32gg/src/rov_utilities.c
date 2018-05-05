@@ -59,9 +59,9 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 
 		for (thr = 0; thr < NUM_THRUSTERS; thr++)
 		{
-			TIMER_CompareBufSet(thruster.timer[thruster.mapping[thr]],
-								thruster.cc[thruster.mapping[thr]],
-								us_to_comparevalue(pwm_data[thruster.mapping[thr]], thruster.timer[thruster.mapping[thr]]));
+			TIMER_CompareBufSet(thruster.timer[thr],
+								thruster.cc[thr],
+								us_to_comparevalue(pwm_data[thruster.mapping[thr]], thruster.timer[thr]));
 		}
 
 		return PWM_UPDATE_OK;
