@@ -5,10 +5,12 @@ struct thruster_config
 	TIMER_TypeDef * timer[NUM_THRUSTERS];		// Timers the thruster pins are connected to
 	uint8_t			cc[NUM_THRUSTERS];			// Compare channel thrusters
 	uint32_t 		location[NUM_THRUSTERS];	// Pinout location
+	uint8_t			mapping[NUM_THRUSTERS];		// Mapping of the thrusters
 } thruster = {
 	{THR0_TIM, 	THR1_TIM, 	THR2_TIM,	THR3_TIM,	THR4_TIM,	THR5_TIM,	THR6_TIM, 	THR7_TIM},
-	{THR0_CC, 	THR1_CC,	THR2_CC, 	THR3_CC, 	THR4_CC, 	THR5_CC, 	THR6_CC, 	THR7_CC},
-	{THR0_LOC, 	THR1_LOC,	THR2_LOC, 	THR3_LOC, 	THR4_LOC, 	THR5_LOC, 	THR6_LOC,	THR7_LOC}};
+	{THR0_CC, 	THR1_CC,	THR2_CC, 	THR3_CC, 	THR4_CC, 	THR5_CC, 	THR6_CC, 	THR7_CC	},
+	{THR0_LOC, 	THR1_LOC,	THR2_LOC, 	THR3_LOC, 	THR4_LOC, 	THR5_LOC, 	THR6_LOC,	THR7_LOC},
+	{THR0,		THR1, 		THR2, 		THR3, 		THR4, 		THR5, 		THR6,		THR7	}};
 
 struct vortex_msg
 {
@@ -27,11 +29,6 @@ uint8_t sequence_type = SEQUENCE_START;
 
 uint32_t us_to_comparevalue(uint32_t us, TIMER_TypeDef *timer)
 {
-	if((us < THRUSTER_MIN_PULSE_WIDTH_US) || (us > THRUSTER_MAX_PULSE_WIDTH_US))
-	{
-		return THRUSTER_START_PULSE_WIDTH_US;
-	}
-
 	return (TIMER_TopGet(timer) / THRUSTER_PWM_PERIOD) * us;
 }
 
@@ -50,27 +47,37 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 			pwm_data_ptr++;
 			pwm_data[i] |= (uint16_t)((*pwm_data_ptr) & 0x00FF);		// lsb
 			pwm_data_ptr++;
+
+			if((pwm_data[i] < THRUSTER_MIN_PULSE_WIDTH_US) || (pwm_data[i] > THRUSTER_MAX_PULSE_WIDTH_US))
+			{
+				pwm_data[i] = THRUSTER_START_PULSE_WIDTH_US;
+			}
+
 		}
 
 		int thr = 0;
 
 		for (thr = 0; thr < NUM_THRUSTERS; thr++)
 		{
-			TIMER_CompareBufSet(thruster.timer[thr],thruster.cc[thr], us_to_comparevalue(pwm_data[thr], thruster.timer[thr]));
+			TIMER_CompareBufSet(thruster.timer[thruster.mapping[thr]],
+								thruster.cc[thruster.mapping[thr]],
+								us_to_comparevalue(pwm_data[thruster.mapping[thr]], thruster.timer[thruster.mapping[thr]]));
 		}
 
 		return PWM_UPDATE_OK;
 	}
 	else
 	{
-		int ch;
 
-		for (ch = 0; ch < 3; ch++)
+		int thr = 0;
+
+		for (thr = 0; thr < NUM_THRUSTERS; thr++)
 		{
-			TIMER_CompareBufSet(TIMER0, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, TIMER0));
-			TIMER_CompareBufSet(TIMER1, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, TIMER1));
-			if (ch <= 2) TIMER_CompareBufSet(TIMER2, ch, us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, TIMER2));
+			TIMER_CompareBufSet(thruster.timer[thruster.mapping[thr]],
+								thruster.cc[thruster.mapping[thr]],
+								us_to_comparevalue(THRUSTER_START_PULSE_WIDTH_US, thruster.timer[thruster.mapping[thr]]));
 		}
+
 		return PWM_UPDATE_FAIL;
 	}
 }
@@ -78,6 +85,16 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 
 uint8_t update_led_pwm(uint8_t *pwm_data_ptr)
 {
+	uint16_t pwm_data;
+
+	// convert 2 x two bytes to 1 x uint16_t
+	pwm_data = (uint16_t)((*pwm_data_ptr << 8) & 0xFF00);	// msb
+	pwm_data_ptr++;
+	pwm_data |= (uint16_t)((*pwm_data_ptr) & 0x00FF);		// lsb
+	pwm_data_ptr++;
+
+	TIMER_CompareBufSet(LIGHT_TIM, LIGHT_CC, us_to_comparevalue(pwm_data, LIGHT_TIM));
+
 	return PWM_UPDATE_OK;
 }
 

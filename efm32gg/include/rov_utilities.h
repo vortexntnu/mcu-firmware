@@ -61,11 +61,13 @@
 #define THR7_CC		1
 #define THR7_LOC	TIMER_ROUTE_LOCATION_LOC3
 
-#define LIGHT0_PORT	gpioPortA
-#define LIGHT0_PIN	14
+#define LIGHT_PORT	gpioPortA
+#define LIGHT_PIN	14
+#define LIGHT_TIM	TIMER3
+#define LIGHT_CC	0
 
-#define LIGHT1_PORT	gpioPortE
-#define LIGHT1_PIN	14
+#define EXTRA_PWM_PORT	gpioPortE
+#define EXTRA_PWM_PIN	14
 
 
 #define MAGIC_START_BYTE 				0x24
@@ -100,6 +102,18 @@
 #define LED_PWM_SCALING					LED_PWM_FREQ * 3
 
 #define NUM_THRUSTERS 					8
+
+enum thruster_mapping
+{
+	THR0,
+	THR1,
+	THR2,
+	THR3,
+	THR4,
+	THR5,
+	THR6,
+	THR7,
+}thruster_mapping;
 
 enum sequence_type
 {
