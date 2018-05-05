@@ -6,13 +6,13 @@
 #include "watchdog.h"
 #include "rov_utilities.h"
 
-void timerSetup(void);
+void clockSetup(void);
 
 int main()
 {
 	CHIP_Init();
 
-	timerSetup();
+	clockSetup();
 
 	initPwm();
 	initUart();
@@ -21,6 +21,10 @@ int main()
 
 	GPIO_PinModeSet(LED1_PORT, LED1_PIN, gpioModePushPullDrive, 1);
 	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 0);
+
+	volatile uint32_t hz_hfper = CMU_ClockFreqGet(cmuClock_HFPER);
+	volatile uint32_t hz_hf = CMU_ClockFreqGet(cmuClock_HF);
+	volatile uint32_t br = USART_BaudrateGet(UART);
 
 	unsigned long resetCause = RMU_ResetCauseGet();
 	RMU_ResetCauseClear();
@@ -43,9 +47,7 @@ int main()
 	uint8_t *receive_data_ptr = &receive_data[0];
 	uint8_t msg_type = MSG_TYPE_NOTYPE;
 
-
 	start_sequence();
-	arm_sequence();
 
 	while (1)
 	{
@@ -141,13 +143,15 @@ int main()
 			default:
 				break;
 		} // switch
+
 		msg_type = MSG_TYPE_NOTYPE;
 		memset(&receive_data[0], 0, sizeof(receive_data));
+
 	} // while
 } // main
 
 
-void timerSetup(void)
+void clockSetup(void)
 {
 
 	// Set clock dividers
