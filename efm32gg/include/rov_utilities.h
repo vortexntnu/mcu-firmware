@@ -76,11 +76,16 @@
 #define MAX_PAYLOAD_SIZE 				16
 #define VORTEX_MSG_MAX_SIZE 			21
 #define VORTEX_MSG_TYPE_INDEX 			2
-#define VORTEX_MSG_START_DATA_INDEX 	3
+#define VORTEX_MSG_START_DATA_INDEX 		3
 #define VORTEX_MSG_CRC_BYTE_INDEX 		19
 
-#define LETIMER_MS 						100		// how often LETIMER0_IRQHandler triggers in milliseconds
-#define ARM_SEQUENCE_DURATION_MS 		2000
+#define LIGHT_MSG_SIZE					7
+#define LIGHT_PAYLOAD_SIZE				2
+
+#define HEARTBEAT_MSG_SIZE				3
+
+#define LETIMER_MS 					100		// how often LETIMER0_IRQHandler triggers in milliseconds
+#define ARM_SEQUENCE_DURATION_MS 		3000
 #define DISARM_SEQUENCE_DURATION_MS		2000
 #define START_SEQUENCE_DURATION_MS 		2000
 
@@ -99,7 +104,7 @@
 #define THRUSTER_MIN_PULSE_WIDTH_US 	1100
 
 #define PWM_FREQ_SCALING				THRUSTER_PWM_FREQ * 3
-#define LED_PWM_SCALING					LED_PWM_FREQ * 3
+#define LED_PWM_SCALING				LED_PWM_FREQ * 3
 
 #define NUM_THRUSTERS 					8
 
@@ -136,13 +141,13 @@ typedef enum msg_state
 typedef enum msg_type
 {
 	MSG_TYPE_NOTYPE,
-	MSG_TYPE_THRUSTER 	= 0x41,
-	MSG_TYPE_LED 		= 0x42,
-	MSG_TYPE_HEARTBEAT 	= 0x43,
-	MSG_TYPE_ACK 		= 0x44,
+	MSG_TYPE_THRUSTER 		= 0x41,
+	MSG_TYPE_LIGHT 		= 0x42,
+	MSG_TYPE_HEARTBEAT		= 0x43,
+	MSG_TYPE_ACK 			= 0x44,
 	MSG_TYPE_NOACK 		= 0x45,
-	MSG_TYPE_ARM 		= 0x46,
-	MSG_TYPE_DISARM 	= 0x47,
+	MSG_TYPE_ARM 			= 0x46,
+	MSG_TYPE_DISARM 		= 0x47,
 }msg_type;
 
 void start_sequence(void);
@@ -153,7 +158,7 @@ void send_vortex_msg(msg_type type);
 
 uint32_t us_to_comparevalue(uint32_t us, TIMER_TypeDef *timer);
 uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr);
-uint8_t update_led_pwm(uint8_t *pwm_data_ptr);
+uint8_t update_light_pwm(uint8_t *pwm_data_ptr);
 bool crc_passed(uint8_t * receive_data);
 
 #endif // ROV_UTILITIES_H

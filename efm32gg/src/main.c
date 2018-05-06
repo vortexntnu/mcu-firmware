@@ -58,33 +58,12 @@ int main()
 				{
 					send_vortex_msg(MSG_TYPE_ACK);
 					msg_type = receive_data[VORTEX_MSG_TYPE_INDEX];
-					strcpy(uart_msg_ptr, "CRC_PASSED()\n\r");
-					USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
-					GPIO_PinOutToggle(LED1_PORT, LED1_PIN);
 					WDOGn_Feed(WDOG);
 				}
 				else
 				{
-					switch (receive_data[VORTEX_MSG_TYPE_INDEX])
-					{
-						case MSG_TYPE_HEARTBEAT:
-							msg_type = MSG_TYPE_HEARTBEAT;
-							GPIO_PinOutToggle(LED2_PORT, LED2_PIN);
-							break;
-
-						case MSG_TYPE_ARM:
-							msg_type = MSG_TYPE_ARM;
-							break;
-
-						case MSG_TYPE_DISARM:
-							msg_type = MSG_TYPE_DISARM;
-							break;
-
-						default:
-							msg_type = MSG_TYPE_NOACK;
-							send_vortex_msg(MSG_TYPE_NOACK);
-							break;
-					}
+					msg_type = MSG_TYPE_NOACK;
+					send_vortex_msg(MSG_TYPE_NOACK);
 				}
 				break;
 
@@ -100,6 +79,7 @@ int main()
 		switch (msg_type)
 		{
 			case MSG_TYPE_THRUSTER:
+				GPIO_PinOutToggle(LED1_PORT, LED1_PIN);
 				strcpy(uart_msg_ptr, "THRUSTER\n\r");
 				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 				if (update_thruster_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
@@ -109,10 +89,11 @@ int main()
 				}
 				break;
 
-			case MSG_TYPE_LED:
+			case MSG_TYPE_LIGHT:
+				GPIO_PinOutToggle(LED1_PORT, LED1_PIN);
 				strcpy(uart_msg_ptr, "THRUSTER\n\r");
 				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
-				if (update_led_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
+				if (update_light_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
 				{
 					//error handling
 				}
@@ -127,6 +108,7 @@ int main()
 				break;
 
 			case MSG_TYPE_HEARTBEAT:
+				GPIO_PinOutToggle(LED2_PORT, LED2_PIN);
 				strcpy(uart_msg_ptr, "HEARTBEAT RECEIVED, PETTING WATCHDOG\n\r");
 				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 				WDOGn_Feed(WDOG);

@@ -15,11 +15,11 @@ struct thruster_config
 struct vortex_msg
 {
 	uint8_t 	magic_start;				// start transmission byte
-	uint8_t 	type;						// message type
+	uint8_t 	type;					// message type
 	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
-	uint8_t 	crc_byte1;         			// crc byte
-	uint8_t 	crc_byte2;					// crc byte
-	uint8_t		magic_stop;					// stop transmission byte
+	uint8_t 	crc_byte1;         		// crc byte
+	uint8_t 	crc_byte2;				// crc byte
+	uint8_t	magic_stop;				// stop transmission byte
 } vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
 
 bool sequence_finished = false;
@@ -83,7 +83,7 @@ uint8_t update_thruster_pwm(uint8_t *pwm_data_ptr)
 }
 
 
-uint8_t update_led_pwm(uint8_t *pwm_data_ptr)
+uint8_t update_light_pwm(uint8_t *pwm_data_ptr)
 {
 	uint16_t pwm_data;
 
@@ -194,6 +194,7 @@ void arm_sequence(void)
 	while (sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
+		update_light_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
 
@@ -257,9 +258,32 @@ bool crc_passed(uint8_t * receive_data)
 	uint16_t crc_checksum_calc = 0;
 	uint16_t crc_checksum_received = 1;
 
-	crc_checksum_calc = crc_16(&receive_data[VORTEX_MSG_START_DATA_INDEX], MAX_PAYLOAD_SIZE);
-	crc_checksum_received = (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX] << 8) & 0xFF00)
-							| (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX+1]) & 0x00FF);
+	switch(receive_data[VORTEX_MSG_TYPE_INDEX])
+	{
+		case MSG_TYPE_THRUSTER:
+			crc_checksum_calc = crc_16(&receive_data[VORTEX_MSG_START_DATA_INDEX], MAX_PAYLOAD_SIZE);
+			crc_checksum_received = (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX] << 8) & 0xFF00)
+										| (uint16_t)((receive_data[VORTEX_MSG_CRC_BYTE_INDEX+1]) & 0x00FF);
+			break;
+
+		case MSG_TYPE_LIGHT:
+			crc_checksum_calc = crc_16(&receive_data[VORTEX_MSG_START_DATA_INDEX], LIGHT_PAYLOAD_SIZE);
+			crc_checksum_received = (uint16_t)((receive_data[LIGHT_MSG_SIZE-2] << 8) & 0xFF00)
+										| (uint16_t)((receive_data[LIGHT_MSG_SIZE - 1]) & 0x00FF);
+			break;
+
+		case MSG_TYPE_ARM:
+			return true;
+
+		case MSG_TYPE_DISARM:
+			return true;
+
+		case MSG_TYPE_HEARTBEAT:
+			return true;
+
+		default:
+			return false;
+	}
 
 	if (crc_checksum_calc == crc_checksum_received)
 	{
