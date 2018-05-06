@@ -18,9 +18,6 @@ void USART1_RX_IRQHandler(void)
 	{
 		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(UART);
 
-		//send back data for debugging
-		//USART_Tx(UART, receiveBuff.data[receiveBuff.writeIndex]);
-
 		if (receiveBuff.data[receiveBuff.writeIndex] == MAGIC_START_BYTE
 			&& receiveBuff.received_start_byte == false)
 		{
@@ -31,11 +28,13 @@ void USART1_RX_IRQHandler(void)
 		if ((receiveBuff.data[receiveBuff.writeIndex] == MAGIC_STOP_BYTE)
 			&& (receiveBuff.received_start_byte == true))
 		{
-			if(((receiveBuff.writeIndex - receiveBuff.start_byte_index) <= VORTEX_MSG_START_DATA_INDEX)
-				 || ((receiveBuff.writeIndex - receiveBuff.start_byte_index) > (VORTEX_MSG_MAX_SIZE -1)))
+			if((   (receiveBuff.writeIndex - receiveBuff.start_byte_index) == TYPE_ONLY_MSG_SIZE - 1)
+				|| (((receiveBuff.writeIndex - receiveBuff.start_byte_index) == LIGHT_MSG_SIZE-1)
+				&& ((receiveBuff.data[receiveBuff.start_byte_index + 1]) ==  MSG_TYPE_LIGHT))
+				|| ((receiveBuff.writeIndex - receiveBuff.start_byte_index) == (VORTEX_MSG_MAX_SIZE -1)))
 			{
-			receiveBuff.received_stop_byte = true;
-			receiveBuff.stop_byte_index = receiveBuff.writeIndex;
+				receiveBuff.received_stop_byte = true;
+				receiveBuff.stop_byte_index = receiveBuff.writeIndex;
 			}
 		}
 

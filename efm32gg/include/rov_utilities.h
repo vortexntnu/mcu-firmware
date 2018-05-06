@@ -82,7 +82,7 @@
 #define LIGHT_MSG_SIZE					7
 #define LIGHT_PAYLOAD_SIZE				2
 
-#define HEARTBEAT_MSG_SIZE				3
+#define TYPE_ONLY_MSG_SIZE				3
 
 #define LETIMER_MS 					100		// how often LETIMER0_IRQHandler triggers in milliseconds
 #define ARM_SEQUENCE_DURATION_MS 		3000
