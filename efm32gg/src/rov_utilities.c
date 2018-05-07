@@ -93,6 +93,11 @@ uint8_t update_light_pwm(uint8_t *pwm_data_ptr)
 	pwm_data |= (uint16_t)((*pwm_data_ptr) & 0x00FF);		// lsb
 	pwm_data_ptr++;
 
+	if((pwm_data < LED_MIN_PULSE_WIDTH_US) || (pwm_data > LED_MAX_PULSE_WIDTH_US))
+	{
+		pwm_data = LED_START_PULSE_WIDTH_US;
+	}
+
 	TIMER_CompareBufSet(LIGHT_TIM, LIGHT_CC, us_to_comparevalue(pwm_data, LIGHT_TIM));
 
 	return PWM_UPDATE_OK;
@@ -136,7 +141,6 @@ void start_sequence(void)
 
 void disarm_sequence(void)
 {
-
 	NVIC_DisableIRQ(USART1_RX_IRQn);
 	NVIC_EnableIRQ(LETIMER0_IRQn);
 

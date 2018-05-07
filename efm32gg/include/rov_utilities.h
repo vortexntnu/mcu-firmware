@@ -65,6 +65,7 @@
 #define LIGHT_PIN	14
 #define LIGHT_TIM	TIMER3
 #define LIGHT_CC	0
+#define LIGH_LOC
 
 #define EXTRA_PWM_PORT	gpioPortE
 #define EXTRA_PWM_PIN	14
@@ -84,7 +85,7 @@
 
 #define TYPE_ONLY_MSG_SIZE				3
 
-#define LETIMER_MS 					100		// how often LETIMER0_IRQHandler triggers in milliseconds
+#define LETIMER_MS 						100		// how often LETIMER0_IRQHandler triggers in milliseconds
 #define ARM_SEQUENCE_DURATION_MS 		3000
 #define DISARM_SEQUENCE_DURATION_MS		2000
 #define START_SEQUENCE_DURATION_MS 		2000
@@ -96,6 +97,8 @@
 
 #define LED_PWM_FREQ 					500
 #define LED_START_PULSE_WIDTH_US 		0
+#define LED_MAX_PULSE_WIDTH_US 			1900
+#define LED_MIN_PULSE_WIDTH_US 			1100
 
 #define THRUSTER_PWM_FREQ 				500
 #define THRUSTER_PWM_PERIOD				2000
@@ -104,7 +107,7 @@
 #define THRUSTER_MIN_PULSE_WIDTH_US 	1100
 
 #define PWM_FREQ_SCALING				THRUSTER_PWM_FREQ * 3
-#define LED_PWM_SCALING				LED_PWM_FREQ * 3
+#define LED_PWM_SCALING					LED_PWM_FREQ * 3
 
 #define NUM_THRUSTERS 					8
 
@@ -141,13 +144,13 @@ typedef enum msg_state
 typedef enum msg_type
 {
 	MSG_TYPE_NOTYPE,
-	MSG_TYPE_THRUSTER 		= 0x41,
+	MSG_TYPE_THRUSTER 	= 0x41,
 	MSG_TYPE_LIGHT 		= 0x42,
-	MSG_TYPE_HEARTBEAT		= 0x43,
-	MSG_TYPE_ACK 			= 0x44,
+	MSG_TYPE_HEARTBEAT	= 0x43,
+	MSG_TYPE_ACK 		= 0x44,
 	MSG_TYPE_NOACK 		= 0x45,
-	MSG_TYPE_ARM 			= 0x46,
-	MSG_TYPE_DISARM 		= 0x47,
+	MSG_TYPE_ARM 		= 0x46,
+	MSG_TYPE_DISARM 	= 0x47,
 }msg_type;
 
 void start_sequence(void);
