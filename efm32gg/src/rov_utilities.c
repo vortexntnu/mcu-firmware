@@ -117,6 +117,7 @@ void start_sequence(void)
 	while (sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
+		update_light_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
 
@@ -153,6 +154,7 @@ void disarm_sequence(void)
 	while (sequence_finished == false)
 	{
 		update_thruster_pwm(&pwm_signals[0]);
+		update_light_pwm(&pwm_signals[0]);
 		WDOGn_Feed(WDOG);
 	}
 

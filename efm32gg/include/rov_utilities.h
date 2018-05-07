@@ -95,7 +95,7 @@
 #define LED2_PIN  						13
 
 #define LED_PWM_FREQ 					500
-#define LED_START_PULSE_WIDTH_US 		1500
+#define LED_START_PULSE_WIDTH_US 		0
 
 #define THRUSTER_PWM_FREQ 				500
 #define THRUSTER_PWM_PERIOD				2000
