@@ -4,6 +4,7 @@
 #include "rov_utilities.h"
 
 #include <string.h>
+
 #include "em_chip.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -11,7 +12,7 @@
 #include "efm32gg_uart.h"
 #include "efm32gg942f1024.h"
 
-#define BUFFERSIZE 128
+#define BUFFERSIZE 7
 
 extern struct circularBuffer receiveBuff;
 

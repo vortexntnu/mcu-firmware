@@ -9,14 +9,15 @@ struct circularBuffer
 	volatile uint8_t  	stop_byte_index;		// stop byte index
 	volatile bool		received_start_byte;	// MAGIC_START_BYTE is received
 	volatile bool		received_stop_byte;		// MAGIC_STOP_BYTE is received
-} receiveBuff, transmitBuff = { {0}, 0, 0, -1, -1, false, false };
+} receiveBuff, transmitBuff = { {0}, 0, 0, 0, 0, false, false };
+
+volatile int16_t start_stop_byte_diff = 0;
 
 
 void USART1_RX_IRQHandler(void)
 {
 	if (UART->STATUS & USART_STATUS_RXDATAV)
 	{
-
 		// write data to receive buffer
 		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(UART);
 
@@ -29,15 +30,27 @@ void USART1_RX_IRQHandler(void)
 			receiveBuff.start_byte_index = receiveBuff.writeIndex;
 		}
 
-		//receive MAGIC_STOP_BYTE
+		// difference in index between start and stop byte
+		start_stop_byte_diff = receiveBuff.writeIndex - receiveBuff.start_byte_index;
+
+		// receive MAGIC_STOP_BYTE
 		if ((receiveBuff.data[receiveBuff.writeIndex] == MAGIC_STOP_BYTE)
 			&& (receiveBuff.received_start_byte == true))
 		{
+			if (start_stop_byte_diff < 0)
+			{
+				start_stop_byte_diff = (receiveBuff.writeIndex + BUFFERSIZE) - receiveBuff.start_byte_index;
+			}
+			else
+			{
+				start_stop_byte_diff = receiveBuff.writeIndex - receiveBuff.start_byte_index;
+			}
+
 			// check to make sure STOP_BYTE is not a part of the data payload
-			if((   (receiveBuff.writeIndex - receiveBuff.start_byte_index) == TYPE_ONLY_MSG_SIZE - 1)
-				|| (((receiveBuff.writeIndex - receiveBuff.start_byte_index) == LIGHT_MSG_SIZE-1)
-				&& ((receiveBuff.data[receiveBuff.start_byte_index + 1]) ==  MSG_TYPE_LIGHT))
-				|| ((receiveBuff.writeIndex - receiveBuff.start_byte_index) == (VORTEX_MSG_MAX_SIZE -1)))
+			if ((   start_stop_byte_diff == TYPE_ONLY_MSG_SIZE - 1)
+				|| (start_stop_byte_diff == (VORTEX_MSG_MAX_SIZE -1))
+			    || ((start_stop_byte_diff == LIGHT_MSG_SIZE-1)
+			    && ((receiveBuff.data[receiveBuff.start_byte_index + 1]) ==  MSG_TYPE_LIGHT)))
 			{
 				receiveBuff.received_stop_byte = true;
 				receiveBuff.stop_byte_index = receiveBuff.writeIndex;
