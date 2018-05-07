@@ -16,8 +16,12 @@ void USART1_RX_IRQHandler(void)
 {
 	if (UART->STATUS & USART_STATUS_RXDATAV)
 	{
+
+		// write data to receive buffer
 		receiveBuff.data[receiveBuff.writeIndex] = USART_RxDataGet(UART);
 
+		// receive MAGIC_START_BYTE
+		// store the index where the byte is written
 		if (receiveBuff.data[receiveBuff.writeIndex] == MAGIC_START_BYTE
 			&& receiveBuff.received_start_byte == false)
 		{
@@ -25,9 +29,11 @@ void USART1_RX_IRQHandler(void)
 			receiveBuff.start_byte_index = receiveBuff.writeIndex;
 		}
 
+		//receive MAGIC_STOP_BYTE
 		if ((receiveBuff.data[receiveBuff.writeIndex] == MAGIC_STOP_BYTE)
 			&& (receiveBuff.received_start_byte == true))
 		{
+			// check to make sure STOP_BYTE is not a part of the data payload
 			if((   (receiveBuff.writeIndex - receiveBuff.start_byte_index) == TYPE_ONLY_MSG_SIZE - 1)
 				|| (((receiveBuff.writeIndex - receiveBuff.start_byte_index) == LIGHT_MSG_SIZE-1)
 				&& ((receiveBuff.data[receiveBuff.start_byte_index + 1]) ==  MSG_TYPE_LIGHT))
@@ -38,9 +44,11 @@ void USART1_RX_IRQHandler(void)
 			}
 		}
 
+		// check if end of receive buffer is reached
 		if ((receiveBuff.received_start_byte == true)
 			&& 	(receiveBuff.writeIndex < receiveBuff.start_byte_index))
 		{
+			// reset start/stop byte index if message size is too big
 			if (((receiveBuff.writeIndex + BUFFERSIZE) - receiveBuff.start_byte_index) > VORTEX_MSG_MAX_SIZE)
 			{
 				receiveBuff.received_start_byte = false;
@@ -135,17 +143,22 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 		return MSG_STATE_RECEIVE_FAIL;
 	}
 
+	// check if circular buffer is written "around"
 	if (start_index > stop_index)
 	{
+		// store message length
 		*receive_data_ptr = (stop_index + BUFFERSIZE + 1) - start_index;
 		receive_data_ptr++;
 
+		// write data from receive buffer to receive data
+		// from start_index to the end of buffer
 		for (i = start_index; i < BUFFERSIZE; i++)
 		{
 			*receive_data_ptr = receiveBuff.data[i];
 			receive_data_ptr++;
 		}
 
+		// write the rest of the data
 		for (i = 0; i <= stop_index; i++)
 		{
 			*receive_data_ptr = receiveBuff.data[i];
@@ -157,6 +170,7 @@ uint8_t receive_vortex_msg(uint8_t *receive_data_ptr)
 		*receive_data_ptr = stop_index - start_index + 1;
 		receive_data_ptr++;
 
+		// write data from receive buffer to receive data
 		for (i = start_index; i <= stop_index; i++)
 		{
 			*receive_data_ptr = receiveBuff.data[i];
