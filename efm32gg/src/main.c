@@ -7,6 +7,7 @@
 #include "rov_utilities.h"
 
 void clockSetup(void);
+void gpioSetup(void);
 
 int main()
 {
@@ -19,8 +20,8 @@ int main()
 	initWdog();
 	initLeTimer();
 
-	GPIO_PinModeSet(LED1_PORT, LED1_PIN, gpioModePushPullDrive, 1);
-	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 0);
+	gpioSetup();
+
 
 	volatile uint32_t hz_hfper = CMU_ClockFreqGet(cmuClock_HFPER);
 	volatile uint32_t hz_hf = CMU_ClockFreqGet(cmuClock_HF);
@@ -34,11 +35,11 @@ int main()
 
 	if (resetCause & RMU_RSTCAUSE_WDOGRST)
 	{
-		strcpy(uart_msg_ptr, "Please pet the watchdog, start initialization...\n\r");
+		strcpy(uart_msg_ptr, "Please pet the watchdog, start initialization\n\r");
 	}
 	else
 	{
-		strcpy(uart_msg_ptr, "MCU reset normally, start initialization...\n\r");
+		strcpy(uart_msg_ptr, "MCU reset normally, start initialization\n\r");
 	}
 
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
@@ -56,7 +57,6 @@ int main()
 			case MSG_STATE_RECEIVE_OK:
 				if (crc_passed(&receive_data[0]) == true)
 				{
-					send_vortex_msg(MSG_TYPE_ACK);
 					msg_type = receive_data[VORTEX_MSG_TYPE_INDEX];
 					WDOGn_Feed(WDOG);
 				}
@@ -80,8 +80,7 @@ int main()
 		{
 			case MSG_TYPE_THRUSTER:
 				GPIO_PinOutToggle(LED1_PORT, LED1_PIN);
-				strcpy(uart_msg_ptr, "THRUSTER\n\r");
-				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+				send_vortex_msg(MSG_TYPE_THRUSTER);
 				if (update_thruster_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
 				{
 					strcpy(uart_msg_ptr, "ROV NOT ARMED\n\r");
@@ -91,8 +90,7 @@ int main()
 
 			case MSG_TYPE_LIGHT:
 				GPIO_PinOutToggle(LED1_PORT, LED1_PIN);
-				strcpy(uart_msg_ptr, "THRUSTER\n\r");
-				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+				send_vortex_msg(MSG_TYPE_LIGHT);
 				if (update_light_pwm(&receive_data[VORTEX_MSG_START_DATA_INDEX]) != PWM_UPDATE_OK)
 				{
 					//error handling
@@ -109,14 +107,12 @@ int main()
 
 			case MSG_TYPE_HEARTBEAT:
 				GPIO_PinOutToggle(LED2_PORT, LED2_PIN);
-				strcpy(uart_msg_ptr, "HEARTBEAT RECEIVED, PETTING WATCHDOG\n\r");
-				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+				send_vortex_msg(MSG_TYPE_HEARTBEAT);
 				WDOGn_Feed(WDOG);
 				break;
 
 			case MSG_TYPE_NOTYPE:
-				strcpy(uart_msg_ptr, "NOTYPE\n\r");
-				USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
+				send_vortex_msg(MSG_TYPE_NOTYPE);
 				break;
 
 			case MSG_TYPE_NOACK:
@@ -132,6 +128,17 @@ int main()
 	} // while
 } // main
 
+void gpioSetup(void)
+{
+	// set LED1 and LED2 as outputs
+	GPIO_PinModeSet(LED1_PORT, LED1_PIN, gpioModePushPullDrive, 0);
+	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 1);
+
+	// Leak sensor setup, enable interrupt
+	GPIO_IntConfig(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, true, true, true);
+	GPIO_PinModeSet(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, gpioModeInput, 0);
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+}
 
 void clockSetup(void)
 {
