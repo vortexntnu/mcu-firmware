@@ -7,11 +7,16 @@
 
 #include "em_rmu.h"
 #include "em_letimer.h"
+#include "em_gpio.h"
 
 #include "pwm.h"
 #include "crc.h"
 #include "uart.h"
 #include "watchdog.h"
+
+#define LEAK_SENSOR_PORT	gpioPortF
+#define LEAK_SENSOR_PIN		12
+#define LEAK_WAIT_TICK		1000000
 
 #define THR0_PORT 	gpioPortD
 #define THR0_PIN	3
@@ -89,6 +94,7 @@
 #define ARM_SEQUENCE_DURATION_MS 		3000
 #define DISARM_SEQUENCE_DURATION_MS		2000
 #define START_SEQUENCE_DURATION_MS 		2000
+#define LEAK_SEQUENCE_DURATION_MS		3000
 
 #define LED1_PORT 						gpioPortE
 #define LED1_PIN  						12
@@ -113,14 +119,14 @@
 
 enum thruster_mapping
 {
-	THR5,
-	THR4,
 	THR6,
 	THR7,
-	THR1,
-	THR0,
-	THR2,
+	THR5,
+	THR4,
 	THR3,
+	THR2,
+	THR0,
+	THR1,
 }thruster_mapping;
 
 enum sequence_type
@@ -151,6 +157,7 @@ typedef enum msg_type
 	MSG_TYPE_NOACK 		= 0x45,
 	MSG_TYPE_ARM 		= 0x46,
 	MSG_TYPE_DISARM 	= 0x47,
+	MSG_TYPE_LEAK		= 0x48,
 }msg_type;
 
 void start_sequence(void);

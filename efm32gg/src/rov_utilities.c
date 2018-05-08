@@ -19,9 +19,10 @@ struct vortex_msg
 	uint8_t 	payload[MAX_PAYLOAD_SIZE];	// payload
 	uint8_t 	crc_byte1;         		// crc byte
 	uint8_t 	crc_byte2;				// crc byte
-	uint8_t	magic_stop;				// stop transmission byte
+	uint8_t		magic_stop;				// stop transmission byte
 } vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
 
+volatile bool is_leak = false;
 bool sequence_finished = false;
 bool rov_armed = false;
 uint16_t sequence_passed_ms = 0;
@@ -169,7 +170,6 @@ void disarm_sequence(void)
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	NVIC_EnableIRQ(USART1_RX_IRQn);
-
 }
 
 
@@ -206,11 +206,35 @@ void arm_sequence(void)
 
 	sequence_finished = false;
 
-
 	strcpy(uart_msg_ptr, "ARMING finished\n\r");
 	USART_PutData((uint8_t*)uart_msg_ptr, strlen(uart_msg));
 
 	NVIC_EnableIRQ(USART1_RX_IRQn);
+}
+
+void leak_sequence(void)
+{
+	NVIC_DisableIRQ(USART1_RX_IRQn);
+	NVIC_DisableIRQ(GPIO_EVEN_IRQn);
+
+	send_vortex_msg(MSG_TYPE_LEAK);
+
+	GPIO_PinOutToggle(LED1_PORT, LED1_PIN);
+	GPIO_PinOutToggle(LED2_PORT, LED2_PIN);
+
+	uint8_t pwm_signals[NUM_THRUSTERS * 2] = {0};
+	update_thruster_pwm(&pwm_signals[0]);
+	update_light_pwm(&pwm_signals[0]);
+
+	volatile int32_t i = 0;
+	volatile int32_t k = 0;
+
+	while (k < 10)
+	{
+		if (i++ > LEAK_WAIT_TICK) k++;
+	}
+
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 }
 
 
@@ -301,29 +325,53 @@ bool crc_passed(uint8_t * receive_data)
 	}
 }
 
+void GPIO_EVEN_IRQHandler(void)
+{
+	// Clear all even pin interrupt flags
+	GPIO_IntClear(0x5555);
+
+	GPIO_PinModeSet(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, gpioModePushPullDrive, 0);
+	GPIO_PinOutClear(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN);
+	GPIO_PinModeSet(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, gpioModeInput, 0);
+
+	NVIC_EnableIRQ(LETIMER0_IRQn);
+
+	is_leak = true;
+	leak_sequence();
+}
+
+
 void send_vortex_msg(msg_type type)
 {
 	switch(type)
 	{
 		case MSG_TYPE_NOACK:
 			vortex_message.type = MSG_TYPE_NOACK;
-			strcpy((char*)&vortex_message.payload[0], "NO ACK");
+			strcpy((char*)&vortex_message.payload[0], "NO MESSAGE RECEIVED\n\r");
 			break;
 		case MSG_TYPE_ACK:
 			vortex_message.type = MSG_TYPE_ACK;
-			strcpy((char*)&vortex_message.payload, "ACK!");
+			strcpy((char*)&vortex_message.payload, "MESSAGE RECEIVED\n\r");
+			break;
+		case MSG_TYPE_LEAK:
+			vortex_message.type = MSG_TYPE_LEAK;
+			strcpy((char*)&vortex_message.payload, "LEAK DETECTED\n\r");
+			break;
+		case MSG_TYPE_THRUSTER:
+			strcpy((char*)&vortex_message.payload[0], "THRUSTER PWM COMMAND\n\r");
+			break;
+		case MSG_TYPE_LIGHT:
+			strcpy((char*)&vortex_message.payload[0], "LIGHT PWM COMMAND\n\r");
+			break;
+		case MSG_TYPE_HEARTBEAT:
+			strcpy((char*)&vortex_message.payload[0], "HEARTBEAT RECEIVED, PETTING WATCHDOG\n\r");
 			break;
 		default:
-			vortex_message.type = MSG_TYPE_NOTYPE;
+			strcpy((char*)&vortex_message.payload[0], "NO TYPE\n\r");
 			break;
 	}
 
-	USART_Tx(UART, vortex_message.magic_start);
-	USART_Tx(UART, vortex_message.type);
 	USART_PutData((uint8_t*) &vortex_message.payload, (uint8_t)strlen((char*)vortex_message.payload));
-	USART_Tx(UART, vortex_message.magic_stop);
-	USART_PutData((uint8_t*)"\n\r", 2);
-
 }
 
 
