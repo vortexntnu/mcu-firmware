@@ -22,7 +22,6 @@ struct vortex_msg
 	uint8_t		magic_stop;				// stop transmission byte
 } vortex_message = { MAGIC_START_BYTE, 0, {0}, 0, 0, MAGIC_STOP_BYTE };
 
-volatile bool is_leak = false;
 bool sequence_finished = false;
 bool rov_armed = false;
 uint16_t sequence_passed_ms = 0;
@@ -215,7 +214,6 @@ void arm_sequence(void)
 void leak_sequence(void)
 {
 	NVIC_DisableIRQ(USART1_RX_IRQn);
-	NVIC_DisableIRQ(GPIO_EVEN_IRQn);
 
 	send_vortex_msg(MSG_TYPE_LEAK);
 
@@ -233,8 +231,6 @@ void leak_sequence(void)
 	{
 		if (i++ > LEAK_WAIT_TICK) k++;
 	}
-
-	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 }
 
 
@@ -327,17 +323,9 @@ bool crc_passed(uint8_t * receive_data)
 
 void GPIO_EVEN_IRQHandler(void)
 {
-	// Clear all even pin interrupt flags
-	GPIO_IntClear(0x5555);
-
-	GPIO_PinModeSet(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, gpioModePushPullDrive, 0);
-	GPIO_PinOutClear(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN);
-	GPIO_PinModeSet(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, gpioModeInput, 0);
-
-	NVIC_EnableIRQ(LETIMER0_IRQn);
-
-	is_leak = true;
+	NVIC_DisableIRQ(GPIO_EVEN_IRQn);
 	leak_sequence();
+	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
 }
 
 

@@ -22,7 +22,6 @@ int main()
 
 	gpioSetup();
 
-
 	volatile uint32_t hz_hfper = CMU_ClockFreqGet(cmuClock_HFPER);
 	volatile uint32_t hz_hf = CMU_ClockFreqGet(cmuClock_HF);
 	volatile uint32_t br = USART_BaudrateGet(UART);
@@ -135,6 +134,7 @@ void gpioSetup(void)
 	GPIO_PinModeSet(LED2_PORT, LED2_PIN, gpioModePushPullDrive, 1);
 
 	// Leak sensor setup, enable interrupt
+	GPIO_IntClear(0x5555);
 	GPIO_IntConfig(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, true, true, true);
 	GPIO_PinModeSet(LEAK_SENSOR_PORT, LEAK_SENSOR_PIN, gpioModeInput, 0);
 	NVIC_EnableIRQ(GPIO_EVEN_IRQn);
